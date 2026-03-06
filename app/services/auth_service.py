@@ -130,3 +130,29 @@ def get_admin_account(
             detail="Invalid admin token",
         )
     return True
+
+
+async def get_agent_by_api_key(
+    x_api_key: str = Header(...),
+    db: AsyncSession = Depends(get_db),
+) -> Account:
+    """FastAPI dependency: authenticate an agent via X-API-Key header."""
+    key_hash = hash_api_key(x_api_key)
+    result = await db.execute(
+        select(Account).where(
+            Account.api_key_hash == key_hash,
+            Account.account_type == "agent",
+        )
+    )
+    account = result.scalar_one_or_none()
+    if account is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key",
+        )
+    if account.status == "frozen":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is frozen",
+        )
+    return account

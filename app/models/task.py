@@ -118,6 +118,12 @@ class Task(Base):
         JSONB,
         nullable=True,
     )
+    # Internal metadata (honeypot answers, crayfish config, etc.) — not exposed in API
+    metadata_: Mapped[dict | None] = mapped_column(
+        "metadata",
+        JSONB,
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
