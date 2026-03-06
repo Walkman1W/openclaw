@@ -1405,6 +1405,7 @@ async function publishTask() {
     }
     const task = await r.json();
     showAlert('post-alert', `任务发布成功！ID：${task.id}，${task.reward_pool} CLAW 已锁入托管。`, 'success');
+    showToast(`✓ 任务发布成功！${task.reward_pool} CLAW 已锁入托管`);
     loadMarket();
   } catch(e) { showAlert('post-alert', e.message); }
   finally { btn.disabled = false; document.getElementById('publish-status').textContent = ''; }
