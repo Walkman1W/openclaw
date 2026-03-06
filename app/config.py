@@ -8,7 +8,10 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     secret_key: str = "change-me-in-production"
     admin_token: str = "change-me-admin-token"
-    anthropic_api_key: str = ""
+    anthropic_api_key: str = ""  # kept for backward compat
+    dashscope_api_key: str = ""
+    llm_base_url: str = "https://coding.dashscope.aliyuncs.com/v1"
+    llm_model: str = "qwen-plus"
     celery_broker_url: str = "redis://localhost:6379/1"
     celery_result_backend: str = "redis://localhost:6379/2"
     initial_claw_human: int = 500

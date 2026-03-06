@@ -1,4 +1,4 @@
-"""TASK-028: Layer 1 LLM-based semantic audit via claude-sonnet.
+"""TASK-028: Layer 1 LLM-based semantic audit via Bailian / Qwen (OpenAI-compatible).
 
 15% of tasks that pass Layer 0 are sampled for Layer 1 review.
 Results are written to audit_logs with layer=1.
@@ -17,7 +17,6 @@ from typing import Any
 from app.config import settings
 
 _SAMPLE_RATE = 0.15  # 15% of under_audit tasks
-_LAYER1_MODEL = "claude-sonnet-4-20250514"
 _MAX_TOKENS = 1024
 _TEMPERATURE = 0.1
 
@@ -63,22 +62,23 @@ async def run_layer1_audit(
     On any API error returns a conservative 'pass' with low confidence
     to avoid false negatives.
     """
-    if not settings.anthropic_api_key:
-        return {"result": "pass", "confidence": 0.500, "reasons": ["anthropic_api_key not set – Layer 1 skipped"]}
+    api_key = settings.dashscope_api_key or settings.anthropic_api_key
+    if not api_key:
+        return {"result": "pass", "confidence": 0.500, "reasons": ["LLM API key not set – Layer 1 skipped"]}
 
     try:
-        import anthropic
-        client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+        from openai import AsyncOpenAI
+        client = AsyncOpenAI(api_key=api_key, base_url=settings.llm_base_url)
 
         prompt = _build_prompt(task_data, result_data)
-        message = await client.messages.create(
-            model=_LAYER1_MODEL,
+        message = await client.chat.completions.create(
+            model=settings.llm_model,
             max_tokens=_MAX_TOKENS,
             temperature=_TEMPERATURE,
             messages=[{"role": "user", "content": prompt}],
         )
 
-        raw = message.content[0].text.strip()
+        raw = message.choices[0].message.content.strip()
         # Strip markdown code fences if present
         if raw.startswith("```"):
             raw = raw.split("```")[1]
