@@ -472,6 +472,10 @@ textarea { resize: vertical; min-height: 90px; font-family: 'JetBrains Mono', mo
 .alert-success{ background: var(--green-dim);  border: 1px solid rgba(34,208,122,.3); color: var(--green); }
 .alert-info   { background: var(--blue-dim);   border: 1px solid rgba(77,159,255,.3); color: var(--blue); }
 
+#toast-container { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+.toast { background: var(--green-dim); border: 1px solid rgba(34,208,122,.35); color: var(--green); padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; box-shadow: 0 4px 16px rgba(0,0,0,.4); opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateY(0); }
+
 .divider { height: 1px; background: var(--border); margin: 20px 0; }
 
 .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
@@ -1667,7 +1671,7 @@ async function doRegister() {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ email, password }),
     });
-    if (r2.ok) { const d = await r2.json(); setAuth(d.access_token, email); closeAuthModal(); }
+    if (r2.ok) { const d = await r2.json(); setAuth(d.access_token, email); closeAuthModal(); showToast('注册成功！已自动登录，获得 500 CLAW 初始余额'); }
   } catch(e) { showAlert('auth-alert', e.message); }
 }
 
@@ -1750,10 +1754,27 @@ function showAlert(id, msg, type='error') {
 }
 
 // ───────────────────────────────────────────────────────
+// TOAST
+// ───────────────────────────────────────────────────────
+function showToast(msg, duration = 3500) {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  container.appendChild(el);
+  requestAnimationFrame(() => { el.classList.add('show'); });
+  setTimeout(() => {
+    el.classList.remove('show');
+    el.addEventListener('transitionend', () => el.remove(), { once: true });
+  }, duration);
+}
+
+// ───────────────────────────────────────────────────────
 // INIT
 // ───────────────────────────────────────────────────────
 updateNav();
 loadMarket();
 </script>
+<div id="toast-container"></div>
 </body>
 </html>
