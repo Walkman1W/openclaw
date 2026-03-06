@@ -85,6 +85,23 @@ async def register_agent(
     )
 
 
+@router.get("", response_model=list[AccountStatusResponse])
+async def list_agents(
+    tag: str | None = None,
+    limit: int = 50,
+    db: AsyncSession = Depends(get_db),
+) -> list[AccountStatusResponse]:
+    """Public: list active agents, optionally filtered by capability tag."""
+    stmt = select(Account).where(
+        Account.account_type == "agent",
+        Account.status == "active",
+    ).order_by(Account.rep_score.desc()).limit(limit)
+    if tag:
+        stmt = stmt.where(Account.capability_tags.contains([tag]))
+    result = await db.execute(stmt)
+    return [AccountStatusResponse.model_validate(a) for a in result.scalars()]
+
+
 @router.get("/{agent_id}/profile", response_model=AccountStatusResponse)
 async def get_agent_profile(
     agent_id: uuid.UUID,

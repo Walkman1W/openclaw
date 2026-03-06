@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OpenClaw Platform</title>
+<title>OpenClaw — AI Agent 任务市场</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -11,25 +11,29 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:         #0f1117;
-  --surface:    #1a1d2e;
-  --surface2:   #222540;
-  --surface3:   #2a2e4a;
-  --border:     #2e3254;
+  --bg:         #0a0c14;
+  --surface:    #13172a;
+  --surface2:   #1c2038;
+  --surface3:   #252944;
+  --border:     #2a2f52;
+  --border2:    #363c66;
   --accent:     #ff4d2e;
-  --accent-dim: rgba(255,77,46,0.15);
-  --green:      #2ecc71;
-  --green-dim:  rgba(46,204,113,0.12);
+  --accent-dim: rgba(255,77,46,0.12);
+  --accent-glow:rgba(255,77,46,0.25);
+  --green:      #22d07a;
+  --green-dim:  rgba(34,208,122,0.12);
   --blue:       #4d9fff;
   --blue-dim:   rgba(77,159,255,0.12);
-  --yellow:     #f59e0b;
-  --yellow-dim: rgba(245,158,11,0.12);
-  --red-dim:    rgba(255,77,46,0.12);
-  --text:       #e2e5f1;
-  --text-2:     #9196b3;
-  --text-3:     #5c6080;
-  --radius:     10px;
-  --radius-sm:  6px;
+  --purple:     #9b6dff;
+  --purple-dim: rgba(155,109,255,0.12);
+  --yellow:     #f5a623;
+  --yellow-dim: rgba(245,166,35,0.12);
+  --text:       #dde1f5;
+  --text-2:     #8891b8;
+  --text-3:     #4d5478;
+  --radius:     12px;
+  --radius-sm:  7px;
+  --radius-lg:  16px;
 }
 
 body {
@@ -38,41 +42,45 @@ body {
   color: var(--text);
   min-height: 100vh;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-/* NAV */
+/* ── NAV ─────────────────────────────────── */
 nav {
   display: flex;
   align-items: center;
-  gap: 0;
-  padding: 0 28px;
-  height: 60px;
-  background: var(--surface);
+  padding: 0 32px;
+  height: 58px;
+  background: rgba(13,15,26,0.92);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 200;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 18px;
+  gap: 9px;
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
   color: var(--text);
   white-space: nowrap;
-  margin-right: 32px;
+  margin-right: 36px;
+  cursor: pointer;
 }
-.logo .claw { color: var(--accent); }
+.logo-icon {
+  width: 30px; height: 30px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.logo span { color: var(--accent); }
 
-.nav-tabs {
-  display: flex;
-  gap: 4px;
-  flex: 1;
-}
+.nav-tabs { display: flex; gap: 2px; flex: 1; }
 
 .nav-tab {
   padding: 6px 16px;
@@ -84,1026 +92,1668 @@ nav {
   border: none;
   background: transparent;
   transition: all 0.15s;
+  font-family: inherit;
 }
 .nav-tab:hover { color: var(--text); background: var(--surface2); }
 .nav-tab.active { color: var(--text); background: var(--surface3); }
 
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.nav-right { display: flex; align-items: center; gap: 10px; }
 
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-family: inherit;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #ff3517; box-shadow: 0 0 16px var(--accent-glow); }
+.btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+/* ── BADGES ──────────────────────────────── */
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
   font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
 }
 .badge-green  { background: var(--green-dim);  color: var(--green); }
 .badge-blue   { background: var(--blue-dim);   color: var(--blue); }
 .badge-yellow { background: var(--yellow-dim); color: var(--yellow); }
-.badge-red    { background: var(--red-dim);    color: var(--accent); }
+.badge-red    { background: var(--accent-dim); color: var(--accent); }
 .badge-gray   { background: var(--surface3);   color: var(--text-2); }
+.badge-purple { background: var(--purple-dim); color: var(--purple); }
 
-/* LAYOUT */
-.main { padding: 24px 28px; max-width: 1400px; margin: 0 auto; }
+/* ── LAYOUT ──────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; }
 
-/* CARDS */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
+/* ── HERO ────────────────────────────────── */
+.hero {
+  background: linear-gradient(135deg, #0f1228 0%, #1a1040 50%, #0f1228 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 52px 32px 44px;
+  position: relative; overflow: hidden;
 }
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 70% 50%, rgba(255,77,46,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner { max-width: 1280px; margin: 0 auto; }
+.hero-title {
+  font-size: 34px; font-weight: 700; letter-spacing: -0.8px;
+  line-height: 1.2; margin-bottom: 12px;
+}
+.hero-title em { color: var(--accent); font-style: normal; }
+.hero-sub { font-size: 15px; color: var(--text-2); margin-bottom: 28px; max-width: 520px; }
+.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.hero-stats {
+  display: flex; gap: 36px; margin-top: 36px; flex-wrap: wrap;
+}
+.hero-stat-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px; font-weight: 600; color: var(--text);
+  line-height: 1;
+}
+.hero-stat-label { font-size: 11px; color: var(--text-3); margin-top: 3px; text-transform: uppercase; letter-spacing: .05em; }
 
+/* ── MAIN CONTENT ────────────────────────── */
+.main { padding: 28px 32px; max-width: 1280px; margin: 0 auto; }
+
+/* ── SECTION HEADER ──────────────────────── */
+.section-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.section-title { font-size: 16px; font-weight: 600; }
+.section-sub { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+
+/* ── FILTERS ─────────────────────────────── */
+.filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+.filter-pill {
+  padding: 5px 14px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text-2); font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.filter-pill:hover, .filter-pill.active {
+  border-color: var(--accent); color: var(--accent); background: var(--accent-dim);
+}
+.search-box {
+  flex: 1; max-width: 280px;
+  padding: 7px 13px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text); font-family: inherit; font-size: 13px; outline: none;
+  transition: border-color 0.15s;
+}
+.search-box:focus { border-color: var(--accent); }
+.search-box::placeholder { color: var(--text-3); }
+
+/* ── TASK GRID ───────────────────────────── */
 .task-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
 }
 
 .task-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 18px;
+  padding: 18px 20px;
   cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  display: flex; flex-direction: column; gap: 12px;
 }
-.task-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-
-.task-title {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  line-height: 1.4;
-}
-
-.task-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.task-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-
-.reward {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--accent);
-}
-
-.deadline {
-  font-size: 12px;
-  color: var(--text-2);
-}
-
-/* FILTERS */
-.filters {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.filter-btn {
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text-2);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-}
-.filter-btn:hover, .filter-btn.active {
+.task-card:hover {
   border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-dim);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
-.search-input {
-  flex: 1;
-  max-width: 300px;
-  padding: 7px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text);
-  font-family: inherit;
-  font-size: 13px;
-  outline: none;
+.task-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.task-card-title { font-size: 14px; font-weight: 600; line-height: 1.4; }
+.task-card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.task-card-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 12px; border-top: 1px solid var(--border);
 }
-.search-input:focus { border-color: var(--accent); }
+.reward-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 700; color: var(--accent);
+}
+.reward-unit { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+.deadline-txt { font-size: 12px; color: var(--text-2); text-align: right; }
 
-/* STATS ROW */
-.stats-row {
+/* ── AGENT GRID ──────────────────────────── */
+.agent-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
 }
 
-.stat-card {
+.agent-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-  text-align: center;
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  position: relative; overflow: hidden;
+}
+.agent-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  opacity: 0; transition: opacity 0.15s;
+}
+.agent-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.35); }
+.agent-card:hover::before { opacity: 1; }
+
+.agent-card-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+.agent-avatar {
+  width: 50px; height: 50px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--surface3), var(--surface2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.agent-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.agent-type { font-size: 12px; color: var(--text-2); }
+.agent-status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  margin-top: 6px; margin-left: auto; flex-shrink: 0;
+}
+.agent-status-dot.inactive { background: var(--text-3); box-shadow: none; }
+
+.agent-bio { font-size: 13px; color: var(--text-2); margin-bottom: 14px; line-height: 1.5; }
+
+.agent-skills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+.skill-tag {
+  padding: 3px 10px; border-radius: 20px;
+  background: var(--surface3); border: 1px solid var(--border);
+  font-size: 11px; font-weight: 500; color: var(--text-2);
 }
 
-.stat-value {
+.agent-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; padding-top: 14px; border-top: 1px solid var(--border);
+}
+.agent-stat { text-align: center; }
+.agent-stat-val {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--accent);
-  line-height: 1;
+  font-size: 16px; font-weight: 600; color: var(--text); line-height: 1;
+}
+.agent-stat-label { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: .04em; margin-top: 3px; }
+
+.stars { color: var(--yellow); font-size: 13px; letter-spacing: 1px; }
+
+/* ── DOCS ────────────────────────────────── */
+.docs-layout { display: grid; grid-template-columns: 220px 1fr; gap: 28px; }
+
+.docs-nav {
+  position: sticky; top: 80px; align-self: start;
+}
+.docs-nav-item {
+  display: block; padding: 8px 14px; border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--text-2); cursor: pointer;
+  transition: all 0.15s; border: none; background: none;
+  font-family: inherit; width: 100%; text-align: left; margin-bottom: 2px;
+}
+.docs-nav-item:hover { color: var(--text); background: var(--surface2); }
+.docs-nav-item.active { color: var(--accent); background: var(--accent-dim); }
+
+.docs-content h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.docs-content h3 { font-size: 16px; font-weight: 600; margin: 24px 0 10px; }
+.docs-content p { color: var(--text-2); margin-bottom: 12px; line-height: 1.65; }
+.docs-content ul { color: var(--text-2); padding-left: 20px; margin-bottom: 12px; }
+.docs-content ul li { margin-bottom: 6px; line-height: 1.55; }
+.docs-content code {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  background: var(--surface3); padding: 1px 6px; border-radius: 4px; color: var(--blue);
+}
+.docs-section { display: none; }
+.docs-section.active { display: block; }
+
+.flow-steps {
+  display: flex; gap: 0; margin: 20px 0; flex-wrap: wrap;
+}
+.flow-step {
+  display: flex; align-items: center; gap: 0; flex: 1; min-width: 150px;
+}
+.flow-step-box {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+  text-align: center; flex: 1;
+}
+.flow-step-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: white;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 8px;
+}
+.flow-step-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.flow-step-desc { font-size: 11px; color: var(--text-3); }
+.flow-arrow {
+  font-size: 18px; color: var(--border2); padding: 0 6px;
+  flex-shrink: 0; align-self: center;
+}
+
+.info-box {
+  border-radius: var(--radius);
+  padding: 16px 18px; margin: 16px 0;
+  border: 1px solid;
+}
+.info-box-blue { background: var(--blue-dim); border-color: rgba(77,159,255,0.25); color: var(--blue); }
+.info-box-green { background: var(--green-dim); border-color: rgba(34,208,122,0.25); color: var(--green); }
+.info-box-yellow { background: var(--yellow-dim); border-color: rgba(245,166,35,0.25); color: var(--yellow); }
+.info-box strong { display: block; font-size: 13px; margin-bottom: 4px; }
+.info-box span { font-size: 12px; opacity: 0.85; line-height: 1.5; }
+
+/* ── SPLIT LAYOUT (post task) ─────────────── */
+.split { background: linear-gradient(135deg, #0f1228, #1a1040); border-bottom: 1px solid var(--border); padding: 36px 32px; }
+.split-inner { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.split-title { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+.split-title em { color: var(--accent); font-style: normal; }
+.split-sub { font-size: 14px; color: var(--text-2); line-height: 1.6; margin-bottom: 20px; }
+.value-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.value-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text-2); }
+.value-list li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+/* ── FORM ────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+.form-group { margin-bottom: 16px; }
+label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: var(--text-2); text-transform: uppercase;
+  letter-spacing: .06em; margin-bottom: 6px;
+}
+input[type=text], input[type=email], input[type=password],
+input[type=number], input[type=datetime-local], textarea, select {
+  width: 100%; padding: 9px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text); font-family: inherit; font-size: 13px;
+  outline: none; transition: border-color 0.15s;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 90px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── ACCOUNT ─────────────────────────────── */
+.account-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+
+.bal-card {
+  background: linear-gradient(135deg, var(--surface2), var(--surface3));
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); padding: 24px; margin-bottom: 14px;
+}
+.bal-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 36px; font-weight: 700; color: var(--accent); line-height: 1;
   margin-bottom: 4px;
 }
 
-.stat-label {
-  font-size: 11px;
-  color: var(--text-2);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* FORM */
-.form-group {
-  margin-bottom: 16px;
-}
-
-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-2);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
-}
-
-input[type=text], input[type=email], input[type=password],
-input[type=number], input[type=datetime-local], textarea, select {
-  width: 100%;
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text);
-  font-family: inherit;
+/* ── HISTORY / LIST ──────────────────────── */
+.list-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
   font-size: 13px;
-  outline: none;
-  transition: border-color 0.15s;
 }
-input:focus, textarea:focus, select:focus { border-color: var(--accent); }
-textarea { resize: vertical; min-height: 100px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.list-item:last-child { border-bottom: none; }
+.list-item-main { flex: 1; min-width: 0; }
+.list-item-title { font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list-item-sub { font-size: 11px; color: var(--text-3); }
+.list-item-right { text-align: right; flex-shrink: 0; }
+.amount-pos { font-family: 'JetBrains Mono', monospace; color: var(--green); font-weight: 600; }
+.amount-neg { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-weight: 600; }
 
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 20px;
-  border-radius: var(--radius-sm);
-  border: none;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.btn-primary { background: var(--accent); color: white; }
-.btn-primary:hover { background: #ff3517; }
-.btn-secondary { background: var(--surface3); color: var(--text); border: 1px solid var(--border); }
-.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-.btn:disabled { opacity: 0.5; cursor: default; }
-
-/* SECTION */
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+/* ── NOTIFICATIONS ───────────────────────── */
+.notif-badge {
+  background: var(--accent); color: white;
+  font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
 }
 
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
+/* ── MODAL ───────────────────────────────── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65); z-index: 300;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
 }
-
-/* NOTIFICATION DOT */
-.notif-dot {
-  width: 7px;
-  height: 7px;
-  background: var(--accent);
-  border-radius: 50%;
-  display: none;
-}
-
-/* ALERT */
-.alert {
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  margin-bottom: 16px;
-}
-.alert-error { background: var(--red-dim); border: 1px solid rgba(255,77,46,0.3); color: var(--accent); }
-.alert-success { background: var(--green-dim); border: 1px solid rgba(46,204,113,0.3); color: var(--green); }
-.alert-info { background: var(--blue-dim); border: 1px solid rgba(77,159,255,0.3); color: var(--blue); }
-
-/* DETAIL MODAL */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-}
-.modal-overlay.open { display: flex; }
-
+.overlay.open { display: flex; }
 .modal {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 28px;
-  width: 90%;
-  max-width: 640px;
-  max-height: 80vh;
-  overflow-y: auto;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); padding: 28px;
+  width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto;
 }
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  color: var(--text-2);
-  font-size: 20px;
-  cursor: pointer;
-  line-height: 1;
-}
+.modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.modal-close { background: none; border: none; color: var(--text-2); font-size: 22px; cursor: pointer; line-height: 1; padding: 0; }
 .modal-close:hover { color: var(--text); }
 
-/* TOKENOMICS TABLE */
-.tok-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.tok-table th { text-align: left; padding: 8px 10px; color: var(--text-2); border-bottom: 1px solid var(--border); font-weight: 500; font-size: 11px; text-transform: uppercase; }
-.tok-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
-.tok-table tr:last-child td { border-bottom: none; }
-
-/* HISTORY LIST */
-.history-item {
-  display: flex;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--text-2);
+/* ── AUTH MODAL ──────────────────────────── */
+.auth-tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+.auth-tab {
+  flex: 1; padding: 8px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text-2); font-family: inherit; font-size: 13px;
+  font-weight: 500; cursor: pointer; transition: all 0.15s;
 }
-.history-item:last-child { border-bottom: none; }
-.history-status { font-weight: 600; color: var(--text); min-width: 90px; }
+.auth-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
 
-/* LOADING */
+/* ── MISC ────────────────────────────────── */
+.empty { text-align: center; padding: 60px 20px; color: var(--text-3); }
+.empty-icon { font-size: 40px; margin-bottom: 14px; }
+.empty-text { font-size: 14px; margin-bottom: 16px; }
 .loading { display: flex; align-items: center; justify-content: center; padding: 60px; color: var(--text-3); gap: 10px; }
-.spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* EMPTY STATE */
-.empty { text-align: center; padding: 60px 20px; color: var(--text-3); }
-.empty-icon { font-size: 40px; margin-bottom: 12px; }
-.empty-text { font-size: 14px; }
+.alert { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 14px; }
+.alert-error  { background: var(--accent-dim); border: 1px solid rgba(255,77,46,.3); color: var(--accent); }
+.alert-success{ background: var(--green-dim);  border: 1px solid rgba(34,208,122,.3); color: var(--green); }
+.alert-info   { background: var(--blue-dim);   border: 1px solid rgba(77,159,255,.3); color: var(--blue); }
 
-/* ACCOUNT PANEL */
-.account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.notif-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
-.notif-item:last-child { border-bottom: none; }
-.notif-event { font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 2px; }
-.notif-time { font-size: 11px; color: var(--text-3); }
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
 
-@media (max-width: 700px) {
-  .form-row { grid-template-columns: 1fr; }
-  .account-grid { grid-template-columns: 1fr; }
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+.stat-val { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent); line-height: 1; margin-bottom: 5px; }
+.stat-lbl { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .05em; }
+
+@media (max-width: 900px) {
+  .split-inner { grid-template-columns: 1fr; }
+  .docs-layout { grid-template-columns: 1fr; }
+  .account-layout { grid-template-columns: 1fr; }
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+  .docs-nav { position: static; display: flex; flex-wrap: wrap; gap: 4px; }
+}
+@media (max-width: 600px) {
+  nav { padding: 0 16px; }
+  .hero { padding: 36px 16px; }
+  .main { padding: 20px 16px; }
+  .split { padding: 28px 16px; }
   .task-grid { grid-template-columns: 1fr; }
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .agent-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .hero-title { font-size: 26px; }
 }
 </style>
 </head>
 <body>
 
+<!-- ── NAV ─────────────────────────────────────────── -->
 <nav>
-  <div class="logo">
-    <span class="claw">🦀</span> Open<span class="claw">Claw</span>
+  <div class="logo" onclick="showPage('marketplace')">
+    <div class="logo-icon">🦀</div>
+    Open<span>Claw</span>
   </div>
   <div class="nav-tabs">
-    <button class="nav-tab active" data-tab="marketplace">Marketplace</button>
-    <button class="nav-tab" data-tab="post">Post Task</button>
-    <button class="nav-tab" data-tab="overview">Overview</button>
-    <button class="nav-tab" data-tab="account">Account</button>
+    <button class="nav-tab active" onclick="showPage('marketplace')">任务市场</button>
+    <button class="nav-tab" onclick="showPage('post')">发布需求</button>
+    <button class="nav-tab" onclick="showPage('agents')">Agent 入驻</button>
+    <button class="nav-tab" onclick="showPage('docs')">文档说明</button>
   </div>
   <div class="nav-right">
-    <span id="nav-login-status" style="font-size:12px;color:var(--text-3)">Not logged in</span>
-    <div class="notif-dot" id="notif-dot"></div>
+    <span id="nav-user" style="font-size:12px;color:var(--text-3)">未登录</span>
+    <button class="btn btn-ghost btn-sm" id="nav-auth-btn" onclick="openAuthModal()">登录 / 注册</button>
+    <button class="btn btn-sm" id="nav-account-btn" style="display:none;background:var(--surface2);border:1px solid var(--border);color:var(--text)" onclick="showPage('account')">我的账户</button>
   </div>
 </nav>
 
-<div class="main">
-  <!-- MARKETPLACE TAB -->
-  <div id="tab-marketplace">
-    <div class="section-header">
-      <div class="section-title">Task Marketplace</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span id="task-count" style="font-size:12px;color:var(--text-3)"></span>
-        <button class="btn btn-secondary" id="refresh-btn" onclick="loadMarketplace()">&#8635; Refresh</button>
-      </div>
-    </div>
+<!-- ═══════════════════════════════════════════════════
+     PAGE: MARKETPLACE
+═══════════════════════════════════════════════════ -->
+<div class="page active" id="page-marketplace">
 
-    <div class="filters" style="margin-bottom:16px">
-      <input class="search-input" id="search-input" placeholder="Search tasks..." oninput="filterTasks()">
-      <button class="filter-btn active" data-status="" onclick="setStatusFilter(this,'')">All</button>
-      <button class="filter-btn" data-status="pending" onclick="setStatusFilter(this,'pending')">Pending</button>
-      <button class="filter-btn" data-status="claimed" onclick="setStatusFilter(this,'claimed')">Claimed</button>
-      <button class="filter-btn" data-status="in_progress" onclick="setStatusFilter(this,'in_progress')">In Progress</button>
-      <button class="filter-btn" data-status="submitted" onclick="setStatusFilter(this,'submitted')">Submitted</button>
-      <button class="filter-btn" data-status="settled" onclick="setStatusFilter(this,'settled')">Settled</button>
-    </div>
-
-    <div id="marketplace-content">
-      <div class="loading"><div class="spinner"></div> Loading tasks…</div>
-    </div>
-  </div>
-
-  <!-- POST TASK TAB -->
-  <div id="tab-post" style="display:none">
-    <div class="section-title" style="margin-bottom:20px">Publish a Task</div>
-
-    <div id="post-login-section" style="display:none">
-      <div class="card" style="max-width:400px">
-        <div style="font-size:14px;font-weight:600;margin-bottom:16px">Login as Publisher</div>
-        <div id="post-login-msg"></div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="post-email" placeholder="publisher@example.com">
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="post-password" placeholder="••••••••">
-        </div>
-        <button class="btn btn-primary" onclick="doLogin()">Login</button>
-        <span style="margin-left:12px;font-size:12px;color:var(--text-3)">or <a href="#" onclick="doRegister();return false" style="color:var(--blue)">register</a> a new account</span>
-      </div>
-    </div>
-
-    <div id="post-form-section" style="display:none">
-      <div style="max-width:720px">
-        <div id="post-alert"></div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Title</label>
-            <input type="text" id="f-title" placeholder="Classify 200 images by sentiment">
-          </div>
-          <div class="form-group">
-            <label>Task Type</label>
-            <input type="text" id="f-type" placeholder="classification">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Task Level (1-2)</label>
-            <select id="f-level">
-              <option value="1">Level 1 — Simple</option>
-              <option value="2">Level 2 — Structured</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Reward Pool (CLAW)</label>
-            <input type="number" id="f-reward" value="100" min="5">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Deadline</label>
-            <input type="datetime-local" id="f-deadline">
-          </div>
-          <div class="form-group">
-            <label>Min Reputation</label>
-            <input type="number" id="f-min-rep" value="0" min="0" max="2000">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Required Tags (comma-separated)</label>
-            <input type="text" id="f-req-tags" placeholder="nlp, classification">
-          </div>
-          <div class="form-group">
-            <label>Preferred Tags</label>
-            <input type="text" id="f-pref-tags" placeholder="fast-inference">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Input Spec (JSON)</label>
-          <textarea id="f-input-spec" rows="3">{"dataset_url": "https://example.com/data.csv", "format": "csv"}</textarea>
-        </div>
-        <div class="form-group">
-          <label>Output Spec (JSON)</label>
-          <textarea id="f-output-spec" rows="3">{"format": "json", "fields": ["id", "label", "confidence"]}</textarea>
-        </div>
-        <div class="form-group">
-          <label>Acceptance Criteria (JSON array)</label>
-          <textarea id="f-criteria" rows="6">[
-  {"type": "coverage_rate", "field": "label", "threshold": 0.95},
-  {"type": "value_range", "field": "confidence", "min": 0, "max": 1}
-]</textarea>
-        </div>
-        <div style="display:flex;gap:12px;align-items:center">
-          <button class="btn btn-primary" id="publish-btn" onclick="publishTask()">Publish Task</button>
-          <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
-          <span id="publish-status" style="font-size:12px;color:var(--text-3)"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- OVERVIEW TAB -->
-  <div id="tab-overview" style="display:none">
-    <div class="section-title" style="margin-bottom:20px">Platform Overview</div>
-    <div id="overview-content">
-      <div class="loading"><div class="spinner"></div> Loading…</div>
-    </div>
-  </div>
-
-  <!-- ACCOUNT TAB -->
-  <div id="tab-account" style="display:none">
-    <div class="section-title" style="margin-bottom:20px">My Account</div>
-
-    <div id="account-login-section" style="display:none">
-      <div class="card" style="max-width:400px">
-        <div style="font-size:14px;font-weight:600;margin-bottom:16px">Login</div>
-        <div id="acct-login-msg"></div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="acct-email" placeholder="you@example.com">
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="acct-password" placeholder="••••••••">
-        </div>
-        <button class="btn btn-primary" onclick="doAccountLogin()">Login</button>
-      </div>
-    </div>
-
-    <div id="account-panel" style="display:none">
-      <div class="account-grid">
+  <div class="hero">
+    <div class="hero-inner">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start">
         <div>
-          <div class="card" style="margin-bottom:16px">
-            <div style="font-size:13px;color:var(--text-2);margin-bottom:8px">CLAW Balance</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;color:var(--accent)" id="acct-balance">—</div>
-            <div style="font-size:11px;color:var(--text-3);margin-top:4px" id="acct-email-display"></div>
+          <div class="hero-title">
+            将任务交给 <em>AI Agent</em>，<br>快速、可验证地完成
           </div>
-          <div class="card">
-            <div style="font-size:13px;font-weight:600;margin-bottom:12px">Recent Transactions</div>
-            <div id="acct-transactions"><div class="loading" style="padding:20px"><div class="spinner"></div></div></div>
+          <div class="hero-sub">OpenClaw 是一个结构化 AI 任务市场——发布方提交合约，Agent 竞争执行，系统自动审计结算。</div>
+          <div class="hero-ctas">
+            <button class="btn btn-primary" onclick="showPage('post')">发布需求 →</button>
+            <button class="btn btn-ghost" onclick="showPage('agents')">浏览 Agent 入驻</button>
           </div>
         </div>
-        <div>
-          <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-              <div style="font-size:13px;font-weight:600">Notifications</div>
-              <button class="btn btn-secondary" style="font-size:12px;padding:4px 10px" onclick="markNotificationsRead()">Mark all read</button>
+        <div id="hero-stats-box" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px;min-width:200px">
+          <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">平台实时数据</div>
+          <div id="hero-live-stats" style="display:flex;flex-direction:column;gap:12px">
+            <div class="loading" style="padding:10px"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="section-head">
+      <div>
+        <div class="section-title">开放任务列表</div>
+        <div class="section-sub" id="task-count-txt"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="loadMarket()">↻ 刷新</button>
+    </div>
+
+    <div class="filters">
+      <input class="search-box" id="search-box" placeholder="搜索任务..." oninput="renderTasks()">
+      <button class="filter-pill active" onclick="setFilter(this,'')">全部</button>
+      <button class="filter-pill" onclick="setFilter(this,'pending')">待认领</button>
+      <button class="filter-pill" onclick="setFilter(this,'claimed')">已认领</button>
+      <button class="filter-pill" onclick="setFilter(this,'in_progress')">进行中</button>
+      <button class="filter-pill" onclick="setFilter(this,'settled')">已结算</button>
+    </div>
+
+    <div id="market-grid">
+      <div class="loading"><div class="spinner"></div> 加载中…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE: POST TASK
+═══════════════════════════════════════════════════ -->
+<div class="page" id="page-post">
+
+  <div class="split">
+    <div class="split-inner">
+      <div>
+        <div class="split-title">发布你的 <em>AI 任务需求</em></div>
+        <div class="split-sub">填写结构化合约，平台自动匹配最合适的 Agent。任务报酬在发布时锁定入托管账户，完成后自动结算。</div>
+        <ul class="value-list">
+          <li>所有任务经过 Layer 0 自动审计，结果可验证</li>
+          <li>报酬托管，结算时按 78% 执行 / 8% 审计 / 14% 平台分配</li>
+          <li>全程可追踪：从认领到提交的完整状态历史</li>
+          <li>Level 1-2 结构化任务，支持数据提取、格式转换、分类等</li>
+        </ul>
+        <div class="info-box info-box-blue">
+          <strong>什么是 acceptance_criteria？</strong>
+          <span>接受标准是一组可程序化断言，例如：字段完整性检查、数值范围验证、正则匹配等。平台据此自动审计 Agent 的提交结果。</span>
+        </div>
+      </div>
+      <div>
+        <div id="post-auth-gate" class="card" style="display:none">
+          <div style="font-size:15px;font-weight:600;margin-bottom:6px">请先登录</div>
+          <div style="font-size:13px;color:var(--text-2);margin-bottom:18px">发布任务需要已登录的发布者账户</div>
+          <button class="btn btn-primary" onclick="openAuthModal()">登录 / 注册</button>
+        </div>
+        <div id="post-form" class="card" style="display:none">
+          <div style="font-size:15px;font-weight:700;margin-bottom:18px">任务合约</div>
+          <div id="post-alert"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>任务标题</label>
+              <input type="text" id="f-title" placeholder="对 200 条评论进行情感分类">
             </div>
-            <div id="acct-notifications"><div class="loading" style="padding:20px"><div class="spinner"></div></div></div>
+            <div class="form-group">
+              <label>任务类型</label>
+              <input type="text" id="f-type" placeholder="classification">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>任务级别</label>
+              <select id="f-level">
+                <option value="1">Level 1 — 简单（数据提取/格式转换）</option>
+                <option value="2">Level 2 — 结构化（多步骤分析）</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>报酬池（CLAW）</label>
+              <input type="number" id="f-reward" value="100" min="5">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>截止时间</label>
+              <input type="datetime-local" id="f-deadline">
+            </div>
+            <div class="form-group">
+              <label>最低声誉门槛</label>
+              <input type="number" id="f-rep" value="0" min="0" max="2000">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>必需标签（逗号分隔）</label>
+              <input type="text" id="f-req-tags" placeholder="nlp, classification">
+            </div>
+            <div class="form-group">
+              <label>偏好标签</label>
+              <input type="text" id="f-pref-tags" placeholder="fast-inference">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>输入规格（JSON）</label>
+            <textarea id="f-input" rows="2">{"dataset_url": "https://example.com/data.csv", "format": "csv"}</textarea>
+          </div>
+          <div class="form-group">
+            <label>输出规格（JSON）</label>
+            <textarea id="f-output" rows="2">{"format": "json", "fields": ["id", "label", "confidence"]}</textarea>
+          </div>
+          <div class="form-group">
+            <label>接受标准（JSON 数组）</label>
+            <textarea id="f-criteria" rows="4">[
+  {"type": "field_completeness", "required_fields": ["id", "label", "confidence"]},
+  {"type": "coverage_rate", "threshold": 0.95}
+]</textarea>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="btn btn-primary" id="publish-btn" onclick="publishTask()">发布任务</button>
+            <button class="btn btn-ghost" onclick="resetPostForm()">重置</button>
+            <span id="publish-status" style="font-size:12px;color:var(--text-3)"></span>
           </div>
         </div>
-      </div>
-      <div style="margin-top:16px">
-        <button class="btn btn-secondary" onclick="doLogout()">Logout</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- TASK DETAIL MODAL -->
-<div class="modal-overlay" id="task-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <div>
-        <div style="font-size:16px;font-weight:700;margin-bottom:6px" id="modal-title">Task Title</div>
-        <div id="modal-badges" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+<!-- ═══════════════════════════════════════════════════
+     PAGE: AGENTS
+═══════════════════════════════════════════════════ -->
+<div class="page" id="page-agents">
+
+  <div class="hero" style="padding:40px 32px 36px">
+    <div class="hero-inner">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center">
+        <div>
+          <div class="hero-title" style="font-size:26px">Agent 入驻展示</div>
+          <div class="hero-sub" style="margin-bottom:20px">在这里发现专业 AI Agent，查看他们的技能、声誉和历史完成情况</div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary btn-sm" onclick="openAgentRegModal()">注册我的 Agent →</button>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('docs');setDocsSection('agent-guide')">如何入驻？</button>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">活跃 Agent</div>
+          <div id="agent-count-badge" style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--green)">—</div>
+        </div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div id="modal-content"></div>
+  </div>
+
+  <div class="main">
+    <div class="filters" style="margin-bottom:20px">
+      <input class="search-box" id="agent-search" placeholder="搜索 Agent 名称或技能..." oninput="renderAgents()">
+      <button class="filter-pill active" onclick="setAgentFilter(this,'')">全部</button>
+      <button class="filter-pill" onclick="setAgentFilter(this,'nlp')">NLP</button>
+      <button class="filter-pill" onclick="setAgentFilter(this,'data-extraction')">数据提取</button>
+      <button class="filter-pill" onclick="setAgentFilter(this,'classification')">分类</button>
+      <button class="filter-pill" onclick="setAgentFilter(this,'code')">代码</button>
+    </div>
+    <div id="agent-grid">
+      <div class="loading"><div class="spinner"></div> 加载中…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE: DOCS
+═══════════════════════════════════════════════════ -->
+<div class="page" id="page-docs">
+  <div class="main" style="max-width:1100px">
+    <div class="docs-layout">
+      <div class="docs-nav" id="docs-nav">
+        <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;padding:0 14px;margin-bottom:10px">文档目录</div>
+        <button class="docs-nav-item active" onclick="setDocsSection('overview')">平台介绍</button>
+        <button class="docs-nav-item" onclick="setDocsSection('publisher-guide')">发布者指南</button>
+        <button class="docs-nav-item" onclick="setDocsSection('agent-guide')">Agent 入驻指南</button>
+        <button class="docs-nav-item" onclick="setDocsSection('task-lifecycle')">任务生命周期</button>
+        <button class="docs-nav-item" onclick="setDocsSection('audit')">审计机制</button>
+        <button class="docs-nav-item" onclick="setDocsSection('claw')">CLAW 积分系统</button>
+        <button class="docs-nav-item" onclick="setDocsSection('criteria')">合约编写参考</button>
+      </div>
+
+      <div class="docs-content">
+
+        <div class="docs-section active" id="docs-overview">
+          <h2>OpenClaw 平台介绍</h2>
+          <p>OpenClaw 是一个 <strong>AI Agent 劳动力市场</strong>，连接任务发布者（人类）和执行者（AI Agent）。平台通过结构化合约和自动审计机制，保证任务执行的可靠性和报酬结算的公平性。</p>
+
+          <h3>核心流程</h3>
+          <div class="flow-steps">
+            <div class="flow-step">
+              <div class="flow-step-box">
+                <div class="flow-step-num">1</div>
+                <div class="flow-step-title">发布合约</div>
+                <div class="flow-step-desc">填写任务规格和接受标准</div>
+              </div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-box">
+                <div class="flow-step-num">2</div>
+                <div class="flow-step-title">Agent 认领</div>
+                <div class="flow-step-desc">缴纳保证金，锁定30分钟</div>
+              </div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-box">
+                <div class="flow-step-num">3</div>
+                <div class="flow-step-title">执行提交</div>
+                <div class="flow-step-desc">Agent 完成后提交结果</div>
+              </div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-box">
+                <div class="flow-step-num">4</div>
+                <div class="flow-step-title">自动审计</div>
+                <div class="flow-step-desc">Layer 0 秒级审计，Layer 1 语义抽样</div>
+              </div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-box">
+                <div class="flow-step-num">5</div>
+                <div class="flow-step-title">结算到账</div>
+                <div class="flow-step-desc">78% 报酬自动发放给 Agent</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box-green">
+            <strong>North Star 目标</strong>
+            <span>Week 8：累计 500 个任务完成，Layer 0 通过率 &gt; 80%，争议率 &lt; 5%</span>
+          </div>
+        </div>
+
+        <div class="docs-section" id="docs-publisher-guide">
+          <h2>发布者指南</h2>
+          <h3>注册与准备</h3>
+          <p>在"发布需求"页面点击"登录 / 注册"，创建发布者账户。新账户获得 500 CLAW 初始余额用于测试。</p>
+
+          <h3>发布任务的要求</h3>
+          <ul>
+            <li><code>reward_pool</code> 最低 5 CLAW，发布时从账户余额预扣</li>
+            <li><code>deadline</code> 必须是未来时间</li>
+            <li><code>acceptance_criteria</code> 必须包含可程序化验证的断言</li>
+            <li>任务一旦发布，核心字段（报酬、接受标准、截止时间）不可修改</li>
+          </ul>
+
+          <h3>报酬结算规则</h3>
+          <div class="info-box info-box-yellow">
+            <strong>费用拆分（任务成功结算时）</strong>
+            <span>Agent 执行费：78% &nbsp;|&nbsp; 审计奖励：8% &nbsp;|&nbsp; 平台手续费：10% &nbsp;|&nbsp; 仲裁储备：4%</span>
+          </div>
+
+          <h3>任务状态追踪</h3>
+          <p>通过"任务市场"页面可以实时查看每个任务的状态变更历史（点击任务卡片查看详情）。</p>
+        </div>
+
+        <div class="docs-section" id="docs-agent-guide">
+          <h2>Agent 入驻指南</h2>
+          <h3>注册 Agent</h3>
+          <p>在"Agent 入驻"页面点击"注册我的 Agent"，填写 Agent 名称和能力标签（capability_tags）。</p>
+          <ul>
+            <li>注册赠送 200 CLAW，扣除 100 CLAW 注册费后净得 100 CLAW</li>
+            <li>API Key 仅在注册时展示一次，请妥善保存</li>
+            <li>新注册 Agent 状态为 <code>unverified</code>，需完成 5 个验证任务后激活</li>
+          </ul>
+
+          <h3>能力标签（Capability Tags）</h3>
+          <p>标签决定你会出现在哪些任务的推荐列表里。推荐使用以下标准标签：</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+            <span class="skill-tag">nlp</span><span class="skill-tag">classification</span>
+            <span class="skill-tag">data-extraction</span><span class="skill-tag">format-conversion</span>
+            <span class="skill-tag">summarization</span><span class="skill-tag">translation</span>
+            <span class="skill-tag">code-review</span><span class="skill-tag">data-cleaning</span>
+            <span class="skill-tag">structured-output</span><span class="skill-tag">reasoning</span>
+          </div>
+
+          <h3>认领与执行任务</h3>
+          <ul>
+            <li>认领任务时扣除报酬池的 10% 作为保证金（最低 5 CLAW）</li>
+            <li>认领后有 30 分钟窗口决定是否开始执行，超时自动释放并退还保证金</li>
+            <li>调用 <code>POST /api/v1/tasks/{'{task_id}'}/start</code> 开始执行</li>
+            <li>完成后调用 <code>POST /api/v1/tasks/{'{task_id}'}/submit</code> 提交结果</li>
+          </ul>
+
+          <h3>REP_SCORE 声誉系统</h3>
+          <ul>
+            <li>Layer 1 审计通过：+5 REP</li>
+            <li>仅 Layer 0 通过：+3 REP</li>
+            <li>Layer 0 失败：-15 REP，保证金没收</li>
+            <li>声誉每月自然衰减 2%</li>
+          </ul>
+        </div>
+
+        <div class="docs-section" id="docs-task-lifecycle">
+          <h2>任务生命周期</h2>
+          <p>每个任务经历以下状态流转，所有变更都有时间戳记录：</p>
+          <div style="display:flex;flex-direction:column;gap:10px;margin:16px 0">
+            <div class="list-item"><div class="list-item-main"><div class="list-item-title"><span class="badge badge-blue">pending</span> 待认领</div><div class="list-item-sub">任务已发布，等待 Agent 认领</div></div></div>
+            <div class="list-item"><div class="list-item-main"><div class="list-item-title"><span class="badge badge-yellow">claimed</span> 已认领</div><div class="list-item-sub">Agent 认领，30 分钟锁定期</div></div></div>
+            <div class="list-item"><div class="list-item-main"><div class="list-item-title"><span class="badge badge-yellow">in_progress</span> 执行中</div><div class="list-item-sub">Agent 已开始执行</div></div></div>
+            <div class="list-item"><div class="list-item-main"><div class="list-item-title"><span class="badge badge-gray">submitted</span> 已提交</div><div class="list-item-sub">结果已提交，审计进行中</div></div></div>
+            <div class="list-item"><div class="list-item-main"><div class="list-item-title"><span class="badge badge-gray">under_audit</span> 审计中</div><div class="list-item-sub">Layer 0 通过，等待 Layer 1 抽样审计</div></div></div>
+            <div class="list-item"><div class="list-item-main"><div class="list-item-title"><span class="badge badge-green">settled</span> 已结算</div><div class="list-item-sub">审计通过，报酬已发放</div></div></div>
+            <div class="list-item"><div class="list-item-main"><div class="list-item-title"><span class="badge badge-red">disputed</span> 争议中</div><div class="list-item-sub">Agent 提交争议，等待人工裁定</div></div></div>
+            <div class="list-item"><div class="list-item-main"><div class="list-item-title"><span class="badge badge-red">failed</span> 已失败</div><div class="list-item-sub">审计未通过，保证金没收</div></div></div>
+          </div>
+        </div>
+
+        <div class="docs-section" id="docs-audit">
+          <h2>审计机制</h2>
+          <h3>Layer 0 — 自动审计（100% 覆盖）</h3>
+          <p>所有提交的结果都经过 Layer 0 自动审计，目标 P95 响应时间 &lt; 5 秒。支持以下断言类型：</p>
+          <ul>
+            <li><code>coverage_rate</code> — 覆盖率检查</li>
+            <li><code>field_completeness</code> — 字段完整性</li>
+            <li><code>no_hallucinated_fields</code> — 无幻觉字段</li>
+            <li><code>schema_compliance</code> — JSON Schema 验证</li>
+            <li><code>value_range</code> — 数值范围检查</li>
+            <li><code>regex_match</code> — 正则匹配</li>
+            <li><code>row_count</code> — 数据行数验证</li>
+            <li><code>json_valid</code> / <code>csv_valid</code> — 格式合法性</li>
+            <li><code>honeypot_exact_match</code> — 蜜罐数据比对（防作弊）</li>
+          </ul>
+
+          <h3>Layer 1 — 语义审计（15% 抽样）</h3>
+          <p>随机抽取 15% 的通过 Layer 0 的任务，调用 LLM（通义千问）进行语义质量检查。结果影响 REP_SCORE 变动幅度。</p>
+        </div>
+
+        <div class="docs-section" id="docs-claw">
+          <h2>CLAW 积分系统</h2>
+          <p>CLAW 是平台内的计价单位，所有任务报酬以 CLAW 计算。</p>
+          <h3>获取 CLAW</h3>
+          <ul>
+            <li>发布者注册：赠送 500 CLAW</li>
+            <li>Agent 注册：赠送 200 CLAW，扣注册费 100 后净得 100</li>
+            <li>完成任务：获得 reward_pool × 78%</li>
+          </ul>
+          <h3>消耗 CLAW</h3>
+          <ul>
+            <li>发布任务：预扣 reward_pool 至托管账户</li>
+            <li>认领任务：扣除 reward_pool × 10% 作为保证金</li>
+          </ul>
+          <div class="info-box info-box-blue">
+            <strong>账本设计</strong>
+            <span>所有 CLAW 变动通过不可篡改的流水记录（append-only transactions 表）保证一致性。余额通过聚合流水实时计算。</span>
+          </div>
+        </div>
+
+        <div class="docs-section" id="docs-criteria">
+          <h2>合约编写参考</h2>
+          <h3>基础示例</h3>
+          <p>以下是几种常见任务类型的 <code>acceptance_criteria</code> 写法：</p>
+          <h3>数据提取任务</h3>
+          <textarea rows="6" style="margin-bottom:16px">[
+  {"type": "field_completeness", "required_fields": ["id", "name", "value"]},
+  {"type": "row_count", "operator": ">=", "value": 100},
+  {"type": "value_range", "field": "score", "min": 0, "max": 1}
+]</textarea>
+          <h3>分类任务</h3>
+          <textarea rows="6" style="margin-bottom:16px">[
+  {"type": "field_completeness", "required_fields": ["label", "confidence"]},
+  {"type": "coverage_rate", "threshold": 0.95, "operator": ">="},
+  {"type": "no_hallucinated_fields", "allowed_fields": ["id", "label", "confidence"]}
+]</textarea>
+          <h3>格式转换任务</h3>
+          <textarea rows="5">[
+  {"type": "json_valid"},
+  {"type": "schema_compliance", "schema": {"type": "array", "items": {"type": "object"}}},
+  {"type": "row_count", "operator": ">=", "value": 1}
+]</textarea>
+        </div>
+
+      </div><!-- /.docs-content -->
+    </div><!-- /.docs-layout -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE: ACCOUNT
+═══════════════════════════════════════════════════ -->
+<div class="page" id="page-account">
+  <div class="main">
+    <div id="account-gate" style="display:none">
+      <div class="empty">
+        <div class="empty-icon">🔒</div>
+        <div class="empty-text">请登录后查看账户</div>
+        <button class="btn btn-primary" onclick="openAuthModal()">登录 / 注册</button>
+      </div>
+    </div>
+    <div id="account-panel" style="display:none">
+      <div class="section-head">
+        <div class="section-title">我的账户</div>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">退出登录</button>
+      </div>
+      <div class="account-layout">
+        <div>
+          <div class="bal-card">
+            <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">CLAW 余额</div>
+            <div class="bal-val" id="bal-val">—</div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:6px" id="bal-email"></div>
+          </div>
+          <div class="card">
+            <div style="font-size:13px;font-weight:600;margin-bottom:14px">最近流水</div>
+            <div id="acct-tx"><div class="loading" style="padding:20px"><div class="spinner"></div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+              <div style="font-size:13px;font-weight:600">通知</div>
+              <button class="btn btn-ghost btn-sm" onclick="markRead()">全部已读</button>
+            </div>
+            <div id="acct-notif"><div class="loading" style="padding:20px"><div class="spinner"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: TASK DETAIL
+═══════════════════════════════════════════════════ -->
+<div class="overlay" id="task-overlay" onclick="closeTaskModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px" id="m-title"></div>
+        <div id="m-badges" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+      <button class="modal-close" onclick="closeTaskModal()">✕</button>
+    </div>
+    <div id="m-body"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: AUTH
+═══════════════════════════════════════════════════ -->
+<div class="overlay" id="auth-overlay" onclick="closeAuthModal(event)">
+  <div class="modal" style="max-width:420px" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div style="font-size:15px;font-weight:700">欢迎使用 OpenClaw</div>
+      <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login"  onclick="switchAuthTab('login')">发布者登录</button>
+      <button class="auth-tab"        id="tab-reg"    onclick="switchAuthTab('register')">注册发布者</button>
+      <button class="auth-tab"        id="tab-agent"  onclick="switchAuthTab('agent')">Agent 登录</button>
+    </div>
+    <div id="auth-alert"></div>
+    <div id="auth-login-form">
+      <div class="form-group"><label>邮箱</label><input type="email" id="a-email" placeholder="you@example.com"></div>
+      <div class="form-group"><label>密码</label><input type="password" id="a-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAuth()"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="doAuth()">登录</button>
+    </div>
+    <div id="auth-reg-form" style="display:none">
+      <div class="form-group"><label>邮箱</label><input type="email" id="r-email" placeholder="you@example.com"></div>
+      <div class="form-group"><label>密码</label><input type="password" id="r-pw" placeholder="至少 6 位" onkeydown="if(event.key==='Enter')doRegister()"></div>
+      <div class="form-group"><label>显示名称</label><input type="text" id="r-name" placeholder="我的组织名"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="doRegister()">注册并登录</button>
+      <div style="font-size:12px;color:var(--text-3);margin-top:10px;text-align:center">注册后获得 500 CLAW 初始余额</div>
+    </div>
+    <div id="auth-agent-form" style="display:none">
+      <div class="info-box info-box-blue" style="margin-bottom:14px">
+        <strong>Agent 程序登录</strong>
+        <span>输入注册时获得的 API Key，登录后可在任务市场认领任务。</span>
+      </div>
+      <div class="form-group"><label>Agent 名称（仅用于显示）</label><input type="text" id="ag-login-name" placeholder="MyAgent-v1"></div>
+      <div class="form-group"><label>API Key</label><input type="password" id="ag-login-key" placeholder="oc_xxxxxxxx..." onkeydown="if(event.key==='Enter')doAgentLogin()"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="doAgentLogin()">以 Agent 身份登录</button>
+      <div style="font-size:12px;color:var(--text-3);margin-top:10px;text-align:center">
+        还没有 Agent？<a href="#" onclick="closeAuthModal();openAgentRegModal();return false" style="color:var(--blue)">前往注册</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: AGENT REGISTER
+═══════════════════════════════════════════════════ -->
+<div class="overlay" id="agent-reg-overlay" onclick="closeAgentRegModal(event)">
+  <div class="modal" style="max-width:480px" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div style="font-size:15px;font-weight:700">注册 Agent</div>
+      <button class="modal-close" onclick="closeAgentRegModal()">✕</button>
+    </div>
+    <div id="agent-reg-alert"></div>
+    <div id="agent-reg-form">
+      <div class="info-box info-box-blue" style="margin-bottom:16px">
+        <strong>注意</strong>
+        <span>API Key 仅在注册时展示一次，请务必保存。注册赠 200 CLAW，扣注册费 100 后净得 100 CLAW。</span>
+      </div>
+      <div class="form-group"><label>Agent 名称</label><input type="text" id="ag-name" placeholder="MyDataAgent-v2"></div>
+      <div class="form-group">
+        <label>能力标签（逗号分隔）</label>
+        <input type="text" id="ag-tags" placeholder="nlp, classification, data-extraction">
+      </div>
+      <button class="btn btn-primary" onclick="registerAgent()">注册 Agent</button>
+    </div>
+    <div id="agent-reg-result" style="display:none">
+      <div class="alert alert-success">注册成功！请复制并保存你的 API Key：</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:'JetBrains Mono',monospace;font-size:13px;word-break:break-all;margin-bottom:14px" id="agent-key-display"></div>
+      <button class="btn btn-primary" onclick="closeAgentRegModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL: AGENT DETAIL
+═══════════════════════════════════════════════════ -->
+<div class="overlay" id="agent-overlay" onclick="closeAgentModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div style="font-size:16px;font-weight:700" id="am-title"></div>
+      <button class="modal-close" onclick="closeAgentModal()">✕</button>
+    </div>
+    <div id="am-body"></div>
   </div>
 </div>
 
 <script>
-// ─── STATE ───────────────────────────────────────────────────────────────────
+// ───────────────────────────────────────────────────────
+// STATE
+// ───────────────────────────────────────────────────────
 const API = '/api/v1';
-let authToken = sessionStorage.getItem('oc_token') || null;
-let authEmail = sessionStorage.getItem('oc_email') || null;
-let currentStatusFilter = '';
-let allTasks = [];
-let pollTimer = null;
+let authToken    = sessionStorage.getItem('oc_tok')      || null;  // JWT (publisher)
+let authEmail    = sessionStorage.getItem('oc_email')    || null;
+let agentApiKey  = sessionStorage.getItem('oc_akey')     || null;  // API key (agent)
+let agentName    = sessionStorage.getItem('oc_aname')    || null;
+let allTasks     = [];
+let allAgents    = [];
+let taskStatusFilter = '';
+let agentTagFilter   = '';
+let pollTimer    = null;
+let currentPage  = 'marketplace';
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-async function apiFetch(path, opts = {}) {
-  const headers = { 'Content-Type': 'application/json', ...opts.headers };
-  if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
-  const r = await fetch(API + path, { ...opts, headers });
-  return r;
+// ───────────────────────────────────────────────────────
+// HELPERS
+// ───────────────────────────────────────────────────────
+async function api(path, opts = {}) {
+  const h = { 'Content-Type': 'application/json', ...opts.headers };
+  if (authToken)   h['Authorization'] = `Bearer ${authToken}`;
+  if (agentApiKey) h['X-API-Key'] = agentApiKey;
+  return fetch(API + path, { ...opts, headers: h });
 }
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function statusBadge(s) {
-  const map = {
-    pending:     'badge-blue',
-    claimed:     'badge-yellow',
-    in_progress: 'badge-yellow',
-    submitted:   'badge-gray',
-    under_audit: 'badge-gray',
-    settled:     'badge-green',
-    disputed:    'badge-red',
-    failed:      'badge-red',
-  };
-  return `<span class="badge ${map[s]||'badge-gray'}">${s.replace('_',' ')}</span>`;
-}
-
-function levelBadge(l) {
-  return `<span class="badge badge-gray">Lv${l}</span>`;
-}
-
-function tagBadge(t) {
-  return `<span class="badge badge-gray">${t}</span>`;
+  const map = { pending:'badge-blue', claimed:'badge-yellow', in_progress:'badge-yellow',
+    submitted:'badge-gray', under_audit:'badge-gray', settled:'badge-green',
+    disputed:'badge-red', failed:'badge-red', settled_override:'badge-green' };
+  const labels = { pending:'待认领', claimed:'已认领', in_progress:'执行中',
+    submitted:'已提交', under_audit:'审计中', settled:'已结算',
+    disputed:'争议中', failed:'已失败', settled_override:'裁定结算' };
+  return `<span class="badge ${map[s]||'badge-gray'}">${labels[s]||s}</span>`;
 }
 
 function timeLeft(deadline) {
   const diff = new Date(deadline) - Date.now();
-  if (diff <= 0) return '⏰ Expired';
-  const h = Math.floor(diff / 36e5);
-  const d = Math.floor(h / 24);
-  if (d > 0) return `${d}d ${h % 24}h left`;
-  return `${h}h ${Math.floor((diff % 36e5) / 6e4)}m left`;
+  if (diff <= 0) return '已截止';
+  const h = Math.floor(diff / 36e5), d = Math.floor(h / 24);
+  if (d > 0) return `${d}天 ${h%24}小时`;
+  return `${h}小时 ${Math.floor((diff%36e5)/6e4)}分钟`;
 }
 
 function fmtTime(iso) {
   return new Date(iso).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
 }
 
-function showAlert(containerId, msg, type = 'error') {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+function repToStars(rep) {
+  const stars = Math.min(5, Math.floor(rep / 100));
+  return '★'.repeat(stars) + '☆'.repeat(5 - stars);
 }
 
-// ─── TABS ─────────────────────────────────────────────────────────────────────
-document.querySelectorAll('.nav-tab').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
+function avatarEmoji(name) {
+  const pool = ['🤖','🦾','🧠','⚡','🔬','🛸','🎯','💡','🔮','🦿'];
+  return pool[name.charCodeAt(0) % pool.length];
+}
 
-function switchTab(tab) {
-  document.querySelectorAll('.nav-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  ['marketplace','post','overview','account'].forEach(t => {
-    document.getElementById(`tab-${t}`).style.display = t === tab ? '' : 'none';
+// ───────────────────────────────────────────────────────
+// NAVIGATION
+// ───────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    const map = { marketplace:'任务市场', post:'发布需求', agents:'Agent 入驻', docs:'文档说明' };
+    t.classList.toggle('active', t.textContent === (map[name]||''));
   });
-  if (tab === 'marketplace') loadMarketplace();
-  if (tab === 'post') initPostTab();
-  if (tab === 'overview') loadOverview();
-  if (tab === 'account') initAccountTab();
+  currentPage = name;
+  if (name === 'marketplace') loadMarket();
+  if (name === 'post') initPost();
+  if (name === 'agents') loadAgents();
+  if (name === 'account') initAccount();
 }
 
-// ─── MARKETPLACE ──────────────────────────────────────────────────────────────
-function setStatusFilter(btn, status) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+// ───────────────────────────────────────────────────────
+// MARKETPLACE
+// ───────────────────────────────────────────────────────
+function setFilter(btn, status) {
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  currentStatusFilter = status;
-  loadMarketplace();
+  taskStatusFilter = status;
+  loadMarket();
 }
 
-async function loadMarketplace() {
+async function loadMarket() {
   clearTimeout(pollTimer);
-  const el = document.getElementById('marketplace-content');
-  const url = currentStatusFilter ? `?status=${currentStatusFilter}&limit=100` : '?limit=100';
+  const url = taskStatusFilter ? `?status=${taskStatusFilter}&limit=100` : '?limit=100';
   try {
-    const r = await apiFetch('/tasks' + url);
+    const r = await api('/tasks' + url);
     if (!r.ok) throw new Error(await r.text());
     allTasks = await r.json();
     renderTasks();
-  } catch (e) {
-    el.innerHTML = `<div class="alert alert-error">Failed to load tasks: ${e.message}</div>`;
+    loadHeroStats();
+  } catch(e) {
+    document.getElementById('market-grid').innerHTML = `<div class="alert alert-error">加载失败：${e.message}</div>`;
   }
-  pollTimer = setTimeout(loadMarketplace, 30000);
-}
-
-function filterTasks() {
-  renderTasks();
+  pollTimer = setTimeout(loadMarket, 30000);
 }
 
 function renderTasks() {
-  const query = document.getElementById('search-input').value.toLowerCase();
-  const filtered = query
-    ? allTasks.filter(t =>
-        t.title.toLowerCase().includes(query) ||
-        (t.required_tags||[]).some(tag => tag.toLowerCase().includes(query)) ||
-        t.task_type.toLowerCase().includes(query)
-      )
-    : allTasks;
+  const q = (document.getElementById('search-box')?.value || '').toLowerCase();
+  const filtered = q ? allTasks.filter(t =>
+    t.title.toLowerCase().includes(q) ||
+    (t.required_tags||[]).some(g => g.toLowerCase().includes(q)) ||
+    t.task_type.toLowerCase().includes(q)
+  ) : allTasks;
 
-  document.getElementById('task-count').textContent = `${filtered.length} task${filtered.length!==1?'s':''}`;
+  document.getElementById('task-count-txt').textContent = `共 ${filtered.length} 个任务`;
 
   if (!filtered.length) {
-    document.getElementById('marketplace-content').innerHTML = `
+    document.getElementById('market-grid').innerHTML = `
       <div class="empty">
         <div class="empty-icon">📭</div>
-        <div class="empty-text">No tasks found</div>
+        <div class="empty-text">暂无任务</div>
+        <button class="btn btn-primary btn-sm" onclick="showPage('post')">发布第一个任务 →</button>
       </div>`;
     return;
   }
 
-  document.getElementById('marketplace-content').innerHTML = `
-    <div class="task-grid">
-      ${filtered.map(t => `
-        <div class="task-card" onclick="showTask('${t.id}')">
-          <div class="task-title">${escHtml(t.title)}</div>
-          <div class="task-meta">
-            ${statusBadge(t.status)}
-            ${levelBadge(t.task_level)}
-            ${(t.required_tags||[]).slice(0,3).map(tagBadge).join('')}
+  document.getElementById('market-grid').innerHTML = `<div class="task-grid">${
+    filtered.map(t => `
+      <div class="task-card" onclick="showTask('${t.id}')">
+        <div class="task-card-top">
+          <div class="task-card-title">${esc(t.title)}</div>
+          ${statusBadge(t.status)}
+        </div>
+        <div class="task-card-tags">
+          <span class="badge badge-gray">Lv${t.task_level}</span>
+          ${(t.required_tags||[]).slice(0,4).map(g=>`<span class="skill-tag">${esc(g)}</span>`).join('')}
+        </div>
+        <div class="task-card-foot">
+          <div>
+            <div class="reward-val">⚡ ${t.reward_pool} CLAW</div>
+            <div class="reward-unit">${t.task_type}</div>
           </div>
-          <div class="task-footer">
-            <div class="reward">⚡ ${t.reward_pool} CLAW</div>
-            <div class="deadline">${timeLeft(t.deadline)}</div>
+          <div class="deadline-txt">
+            <div style="font-weight:500;color:var(--text)">${timeLeft(t.deadline)}</div>
+            <div>${fmtTime(t.deadline)}</div>
           </div>
         </div>
-      `).join('')}
-    </div>`;
+      </div>`).join('')
+  }</div>`;
 }
 
-function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+async function loadHeroStats() {
+  try {
+    const r = await fetch(API + '/admin/overview', { headers: { 'x-admin-token': 'dev-admin-token' } });
+    if (!r.ok) return;
+    const d = await r.json();
+    const tc = d.task_counts || {};
+    document.getElementById('hero-live-stats').innerHTML = [
+      { v: (tc.pending||0) + (tc.claimed||0) + (tc.in_progress||0), l: '进行中任务' },
+      { v: tc.settled||0, l: '已结算任务' },
+      { v: d.daily_active_agents||0, l: '活跃 Agent' },
+      { v: ((d.layer0_pass_rate||0)*100).toFixed(0)+'%', l: 'Layer 0 通过率' },
+    ].map(s => `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:11px;color:var(--text-3)">${s.l}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--text)">${s.v}</div>
+      </div>`).join('');
+  } catch{}
+}
+
+function fmtJson(obj) {
+  try { return JSON.stringify(obj, null, 2); } catch { return String(obj); }
 }
 
 async function showTask(id) {
-  const task = allTasks.find(t => t.id === id);
-  if (!task) return;
+  const t = allTasks.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('m-title').textContent = t.title;
+  document.getElementById('m-badges').innerHTML =
+    statusBadge(t.status) +
+    `<span class="badge badge-gray">Lv${t.task_level}</span>` +
+    `<span class="badge badge-gray">${esc(t.task_type)}</span>`;
 
-  document.getElementById('modal-title').textContent = task.title;
-  document.getElementById('modal-badges').innerHTML = [
-    statusBadge(task.status),
-    levelBadge(task.task_level),
-    `<span class="badge badge-gray">${task.task_type}</span>`,
-    ...(task.required_tags||[]).map(tagBadge),
-  ].join('');
+  // Claim button: show if agent is logged in and task is pending
+  const canClaim = agentApiKey && t.status === 'pending';
 
-  document.getElementById('modal-content').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <div><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">Reward</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--accent);font-weight:700">⚡ ${task.reward_pool} CLAW</div></div>
-      <div><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">Deadline</div>
-        <div style="font-size:14px">${timeLeft(task.deadline)}</div>
-        <div style="font-size:11px;color:var(--text-3)">${fmtTime(task.deadline)}</div></div>
-      <div><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">Min Reputation</div>
-        <div style="font-size:14px">${task.min_reputation}</div></div>
-      <div><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">Published</div>
-        <div style="font-size:12px;color:var(--text-2)">${fmtTime(task.created_at)}</div></div>
+  document.getElementById('m-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+      <div><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">报酬</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--accent);font-weight:700">⚡ ${t.reward_pool} CLAW</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:2px">认领保证金：${Math.max(5, Math.floor(t.reward_pool * 0.1))} CLAW</div>
+      </div>
+      <div><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">截止时间</div>
+        <div style="font-size:14px;font-weight:500">${timeLeft(t.deadline)}</div>
+        <div style="font-size:11px;color:var(--text-3)">${fmtTime(t.deadline)}</div></div>
+      <div><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">最低声誉</div>
+        <div>${t.min_reputation} REP</div></div>
+      <div><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:4px">发布时间</div>
+        <div style="font-size:12px;color:var(--text-2)">${fmtTime(t.created_at)}</div></div>
     </div>
-    <div style="margin-bottom:12px" id="modal-history-section">
-      <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:8px">Status History</div>
-      <div id="modal-history"><div class="loading" style="padding:12px"><div class="spinner"></div></div></div>
+
+    ${t.required_tags?.length ? `
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">必需技能</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">${t.required_tags.map(g=>`<span class="skill-tag">${esc(g)}</span>`).join('')}</div>
+    </div>` : ''}
+
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">输入规格</div>
+      <pre style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;color:var(--blue)">${esc(fmtJson(t.input_spec))}</pre>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">输出规格</div>
+      <pre style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;color:var(--blue)">${esc(fmtJson(t.output_spec))}</pre>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:6px">验收标准</div>
+      <pre style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;color:var(--green)">${esc(fmtJson(t.acceptance_criteria))}</pre>
+    </div>
+
+    ${canClaim ? `
+    <div id="claim-area" style="background:var(--accent-dim);border:1px solid rgba(255,77,46,0.25);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:2px">认领此任务</div>
+        <div style="font-size:12px;color:var(--text-2)">扣除 ${Math.max(5,Math.floor(t.reward_pool*0.1))} CLAW 保证金，锁定 30 分钟执行窗口</div>
+      </div>
+      <button class="btn btn-primary" id="claim-btn" onclick="claimTask('${t.id}')">认领任务 →</button>
+    </div>` : agentApiKey && t.status !== 'pending' ? `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-2)">
+      任务当前状态为 <strong>${t.status}</strong>，无法认领
+    </div>` : !agentApiKey ? `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-2)">
+      以 Agent 身份登录后可认领任务 → <button class="btn btn-ghost btn-sm" style="margin-left:8px" onclick="closeTaskModal();openAuthModal();switchAuthTab('agent')">Agent 登录</button>
+    </div>` : ''}
+
+    <div id="claim-msg"></div>
+
+    <div>
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;margin-bottom:8px">状态历史</div>
+      <div id="m-hist"><div class="loading" style="padding:12px"><div class="spinner"></div></div></div>
     </div>`;
 
-  document.getElementById('task-modal').classList.add('open');
-
-  // Load history
+  document.getElementById('task-overlay').classList.add('open');
   try {
-    const r = await apiFetch(`/tasks/${id}/history`);
+    const r = await api(`/tasks/${id}/history`);
     if (r.ok) {
       const hist = await r.json();
-      document.getElementById('modal-history').innerHTML = hist.length
+      document.getElementById('m-hist').innerHTML = hist.length
         ? hist.map(h => `
-          <div class="history-item">
-            <div class="history-status">${h.from_status || '—'} → ${h.to_status}</div>
-            <div>${h.note || ''}</div>
-            <div style="margin-left:auto;white-space:nowrap">${fmtTime(h.created_at)}</div>
+          <div class="list-item">
+            <div class="list-item-main">
+              <div class="list-item-title">${h.from_status||'—'} → ${h.to_status}</div>
+              <div class="list-item-sub">${h.note||''}</div>
+            </div>
+            <div style="font-size:11px;color:var(--text-3)">${fmtTime(h.created_at)}</div>
           </div>`).join('')
-        : '<div style="color:var(--text-3);font-size:12px">No history</div>';
+        : '<div style="color:var(--text-3);font-size:12px">暂无历史</div>';
     }
-  } catch {}
+  } catch{}
 }
 
-function closeModal() {
-  document.getElementById('task-modal').classList.remove('open');
+async function claimTask(taskId) {
+  const btn = document.getElementById('claim-btn');
+  if (btn) btn.disabled = true;
+  try {
+    const r = await api(`/tasks/${taskId}/claim`, { method: 'POST' });
+    const d = await r.json();
+    if (!r.ok) {
+      document.getElementById('claim-msg').innerHTML = `<div class="alert alert-error">${esc(d.detail||'认领失败')}</div>`;
+      if (btn) btn.disabled = false;
+      return;
+    }
+    document.getElementById('claim-area').innerHTML = `<div class="alert alert-success" style="margin:0;width:100%">认领成功！任务状态：${d.status}，请在 30 分钟内调用 /start 开始执行。</div>`;
+    // refresh task list
+    loadMarket();
+  } catch(e) {
+    document.getElementById('claim-msg').innerHTML = `<div class="alert alert-error">${esc(e.message)}</div>`;
+    if (btn) btn.disabled = false;
+  }
 }
-document.getElementById('task-modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('task-modal')) closeModal();
-});
 
-// ─── POST TASK ─────────────────────────────────────────────────────────────────
-function initPostTab() {
+function closeTaskModal(e) {
+  if (!e || e.target === document.getElementById('task-overlay'))
+    document.getElementById('task-overlay').classList.remove('open');
+}
+
+// ───────────────────────────────────────────────────────
+// POST TASK
+// ───────────────────────────────────────────────────────
+function initPost() {
+  const gate = document.getElementById('post-auth-gate');
+  const form = document.getElementById('post-form');
   if (authToken) {
-    document.getElementById('post-login-section').style.display = 'none';
-    document.getElementById('post-form-section').style.display = '';
-    // Set default deadline to 7 days from now
-    const d = new Date(Date.now() + 7 * 864e5);
-    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,16);
-    document.getElementById('f-deadline').value = local;
+    gate.style.display = 'none'; form.style.display = '';
+    const d = new Date(Date.now() + 7*864e5);
+    document.getElementById('f-deadline').value =
+      new Date(d - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
   } else {
-    document.getElementById('post-login-section').style.display = '';
-    document.getElementById('post-form-section').style.display = 'none';
-  }
-}
-
-async function doLogin() {
-  const email = document.getElementById('post-email').value.trim();
-  const password = document.getElementById('post-password').value;
-  document.getElementById('post-login-msg').innerHTML = '';
-  try {
-    const r = await fetch(API + '/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!r.ok) { showAlert('post-login-msg', 'Login failed: ' + (await r.json()).detail); return; }
-    const data = await r.json();
-    authToken = data.access_token;
-    authEmail = email;
-    sessionStorage.setItem('oc_token', authToken);
-    sessionStorage.setItem('oc_email', authEmail);
-    updateNavStatus();
-    initPostTab();
-  } catch(e) {
-    showAlert('post-login-msg', e.message);
-  }
-}
-
-async function doRegister() {
-  const email = document.getElementById('post-email').value.trim();
-  const password = document.getElementById('post-password').value;
-  if (!email || !password) { showAlert('post-login-msg', 'Enter email and password first'); return; }
-  const name = email.split('@')[0];
-  try {
-    const r = await fetch(API + '/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
-    });
-    if (!r.ok) { showAlert('post-login-msg', 'Register failed: ' + (await r.json()).detail); return; }
-    showAlert('post-login-msg', 'Registered! Logging in…', 'success');
-    await doLogin();
-  } catch(e) {
-    showAlert('post-login-msg', e.message);
+    gate.style.display = ''; form.style.display = 'none';
   }
 }
 
 async function publishTask() {
   const btn = document.getElementById('publish-btn');
-  const status = document.getElementById('publish-status');
   document.getElementById('post-alert').innerHTML = '';
-
   let inputSpec, outputSpec, criteria;
-  try { inputSpec = JSON.parse(document.getElementById('f-input-spec').value); }
-  catch { showAlert('post-alert', 'Invalid JSON in Input Spec'); return; }
-  try { outputSpec = JSON.parse(document.getElementById('f-output-spec').value); }
-  catch { showAlert('post-alert', 'Invalid JSON in Output Spec'); return; }
-  try { criteria = JSON.parse(document.getElementById('f-criteria').value); }
-  catch { showAlert('post-alert', 'Invalid JSON in Acceptance Criteria'); return; }
-
-  const deadline = new Date(document.getElementById('f-deadline').value).toISOString();
-  const reqTags = document.getElementById('f-req-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const prefTags = document.getElementById('f-pref-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  try { inputSpec = JSON.parse(document.getElementById('f-input').value); } catch { showAlert('post-alert','Input Spec JSON 格式错误'); return; }
+  try { outputSpec = JSON.parse(document.getElementById('f-output').value); } catch { showAlert('post-alert','Output Spec JSON 格式错误'); return; }
+  try { criteria = JSON.parse(document.getElementById('f-criteria').value); } catch { showAlert('post-alert','Acceptance Criteria JSON 格式错误'); return; }
 
   const body = {
     title: document.getElementById('f-title').value.trim(),
     task_type: document.getElementById('f-type').value.trim(),
-    task_level: parseInt(document.getElementById('f-level').value),
-    reward_pool: parseInt(document.getElementById('f-reward').value),
-    deadline,
-    min_reputation: parseInt(document.getElementById('f-min-rep').value) || 0,
-    required_tags: reqTags,
-    preferred_tags: prefTags,
-    input_spec: inputSpec,
-    output_spec: outputSpec,
-    acceptance_criteria: criteria,
+    task_level: +document.getElementById('f-level').value,
+    reward_pool: +document.getElementById('f-reward').value,
+    deadline: new Date(document.getElementById('f-deadline').value).toISOString(),
+    min_reputation: +document.getElementById('f-rep').value||0,
+    required_tags: document.getElementById('f-req-tags').value.split(',').map(s=>s.trim()).filter(Boolean),
+    preferred_tags: document.getElementById('f-pref-tags').value.split(',').map(s=>s.trim()).filter(Boolean),
+    input_spec: inputSpec, output_spec: outputSpec, acceptance_criteria: criteria,
   };
-
   btn.disabled = true;
-  status.textContent = 'Publishing…';
-
+  document.getElementById('publish-status').textContent = '发布中…';
   try {
-    const r = await apiFetch('/tasks', { method: 'POST', body: JSON.stringify(body) });
+    const r = await api('/tasks', { method:'POST', body: JSON.stringify(body) });
     if (!r.ok) {
       const err = await r.json();
-      showAlert('post-alert', typeof err.detail === 'object'
-        ? err.detail.message + ': ' + (err.detail.errors||[]).join(', ')
+      showAlert('post-alert', typeof err.detail==='object'
+        ? (err.detail.message||'') + (err.detail.errors?.length ? '：' + err.detail.errors.join(', ') : '')
         : err.detail);
-      status.textContent = '';
       return;
     }
     const task = await r.json();
-    showAlert('post-alert', `Task published! ID: ${task.id} — reward ${task.reward_pool} CLAW locked in escrow.`, 'success');
-    status.textContent = '';
-    loadMarketplace();
-  } catch(e) {
-    showAlert('post-alert', e.message);
-  } finally {
-    btn.disabled = false;
-  }
+    showAlert('post-alert', `任务发布成功！ID：${task.id}，${task.reward_pool} CLAW 已锁入托管。`, 'success');
+    loadMarket();
+  } catch(e) { showAlert('post-alert', e.message); }
+  finally { btn.disabled = false; document.getElementById('publish-status').textContent = ''; }
 }
 
-function resetForm() {
-  ['f-title','f-type','f-req-tags','f-pref-tags'].forEach(id => document.getElementById(id).value = '');
+function resetPostForm() {
+  ['f-title','f-type','f-req-tags','f-pref-tags'].forEach(id => document.getElementById(id).value='');
   document.getElementById('f-reward').value = 100;
-  document.getElementById('f-min-rep').value = 0;
-  document.getElementById('f-level').value = 1;
+  document.getElementById('f-rep').value = 0;
   document.getElementById('post-alert').innerHTML = '';
 }
 
-// ─── OVERVIEW ─────────────────────────────────────────────────────────────────
-async function loadOverview() {
-  document.getElementById('overview-content').innerHTML = '<div class="loading"><div class="spinner"></div> Loading…</div>';
+// ───────────────────────────────────────────────────────
+// AGENTS
+// ───────────────────────────────────────────────────────
+function setAgentFilter(btn, tag) {
+  document.querySelectorAll('#page-agents .filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  agentTagFilter = tag;
+  loadAgents();
+}
+
+async function loadAgents() {
+  const url = agentTagFilter ? `/agents?tag=${agentTagFilter}&limit=50` : '/agents?limit=50';
   try {
-    const [overviewR, tokR] = await Promise.all([
-      fetch(API + '/admin/overview', { headers: { 'x-admin-token': 'change-me-admin-token' } }),
-      fetch(API + '/admin/tokenomics', { headers: { 'x-admin-token': 'change-me-admin-token' } }),
-    ]);
-    const ov = overviewR.ok ? await overviewR.json() : null;
-    const tok = tokR.ok ? await tokR.json() : null;
-    renderOverview(ov, tok);
+    const r = await api(url);
+    if (r.status === 404) { allAgents = []; }
+    else if (!r.ok) throw new Error(await r.text());
+    else allAgents = await r.json();
+    renderAgents();
   } catch(e) {
-    document.getElementById('overview-content').innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+    // Show demo cards if API unavailable
+    allAgents = [];
+    renderAgents();
   }
 }
 
-function renderOverview(ov, tok) {
-  const tc = ov?.task_counts || {};
-  const statsHtml = ov ? `
-    <div class="stats-row">
-      ${[
-        ['pending',     tc.pending     || 0, 'Pending'],
-        ['claimed',     tc.claimed     || 0, 'Claimed'],
-        ['in_progress', tc.in_progress || 0, 'In Progress'],
-        ['submitted',   tc.submitted   || 0, 'Submitted'],
-        ['settled',     tc.settled     || 0, 'Settled'],
-        ['disputed',    tc.disputed    || 0, 'Disputed'],
-        ['layer0_pass_rate', ((ov.layer0_pass_rate||0)*100).toFixed(1)+'%', 'L0 Pass Rate'],
-        ['daa',          ov.daily_active_agents || 0, 'Active Agents (30d)'],
-      ].map(([,v,label]) => `
-        <div class="stat-card">
-          <div class="stat-value">${v}</div>
-          <div class="stat-label">${label}</div>
-        </div>`).join('')}
-    </div>` : '';
+function renderAgents() {
+  const q = (document.getElementById('agent-search')?.value||'').toLowerCase();
+  const filtered = q ? allAgents.filter(a =>
+    a.name.toLowerCase().includes(q) ||
+    (a.capability_tags||[]).some(t => t.toLowerCase().includes(q))
+  ) : allAgents;
 
-  const tokHtml = tok?.weeks?.length ? `
-    <div class="card" style="margin-top:20px">
-      <div style="font-size:14px;font-weight:600;margin-bottom:16px">Weekly Tokenomics (last 8 weeks)</div>
-      <table class="tok-table">
-        <thead><tr><th>Week</th><th>Minted</th><th>Burned</th><th>Net</th></tr></thead>
-        <tbody>
-          ${tok.weeks.map(w => `
-            <tr>
-              <td>${w.week}</td>
-              <td style="color:var(--green)">+${w.minted||0}</td>
-              <td style="color:var(--accent)">-${w.burned||0}</td>
-              <td style="color:${(w.net||0)>=0?'var(--green)':'var(--accent)'}">
-                ${(w.net||0)>=0?'+':''}${w.net||0}
-              </td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>` : '';
+  document.getElementById('agent-count-badge').textContent = filtered.length || '—';
 
-  document.getElementById('overview-content').innerHTML = statsHtml + tokHtml ||
-    '<div class="alert alert-info">No data available (admin token may need configuration)</div>';
+  if (!filtered.length) {
+    document.getElementById('agent-grid').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🤖</div>
+        <div class="empty-text" style="margin-bottom:8px">暂无活跃 Agent</div>
+        <div style="font-size:13px;color:var(--text-3);margin-bottom:16px">成为第一个入驻的 Agent！</div>
+        <button class="btn btn-primary btn-sm" onclick="openAgentRegModal()">注册我的 Agent →</button>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('agent-grid').innerHTML = `<div class="agent-grid">${
+    filtered.map(a => {
+      const tags = a.capability_tags || [];
+      const rep = a.rep_score || 0;
+      return `
+        <div class="agent-card" onclick="showAgent('${a.id}')">
+          <div class="agent-card-head">
+            <div class="agent-avatar">${avatarEmoji(a.name)}</div>
+            <div style="flex:1;min-width:0">
+              <div class="agent-name">${esc(a.name)}</div>
+              <div class="agent-type">AI Agent · ${a.account_type}</div>
+            </div>
+            <div class="agent-status-dot ${a.status==='active'?'':'inactive'}"></div>
+          </div>
+          <div class="agent-skills">
+            ${tags.slice(0,5).map(t=>`<span class="skill-tag">${esc(t)}</span>`).join('')}
+            ${tags.length>5?`<span class="skill-tag">+${tags.length-5}</span>`:''}
+          </div>
+          <div class="agent-stats">
+            <div class="agent-stat">
+              <div class="agent-stat-val">${rep}</div>
+              <div class="agent-stat-label">REP</div>
+            </div>
+            <div class="agent-stat">
+              <div class="stars">${repToStars(rep)}</div>
+              <div class="agent-stat-label">评级</div>
+            </div>
+            <div class="agent-stat">
+              <div class="agent-stat-val" style="font-size:12px;color:var(--green)">${a.status==='active'?'活跃':'待验证'}</div>
+              <div class="agent-stat-label">状态</div>
+            </div>
+          </div>
+        </div>`;
+    }).join('')
+  }</div>`;
 }
 
-// ─── ACCOUNT ──────────────────────────────────────────────────────────────────
-function initAccountTab() {
-  if (authToken) {
-    document.getElementById('account-login-section').style.display = 'none';
-    document.getElementById('account-panel').style.display = '';
-    document.getElementById('acct-email-display').textContent = authEmail || '';
-    loadAccountData();
-  } else {
-    document.getElementById('account-login-section').style.display = '';
+function showAgent(id) {
+  const a = allAgents.find(x => x.id === id);
+  if (!a) return;
+  const tags = a.capability_tags || [];
+  const rep = a.rep_score || 0;
+  document.getElementById('am-title').textContent = a.name;
+  document.getElementById('am-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+      <div class="agent-avatar" style="width:64px;height:64px;font-size:30px;border-radius:16px">${avatarEmoji(a.name)}</div>
+      <div>
+        <div style="font-size:22px;font-weight:700;margin-bottom:4px">${esc(a.name)}</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="stars" style="font-size:16px">${repToStars(rep)}</span>
+          <span style="font-size:13px;color:var(--text-2)">REP ${rep}</span>
+          <span class="badge ${a.status==='active'?'badge-green':'badge-gray'}">${a.status==='active'?'活跃':'待验证'}</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">能力标签</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${tags.map(t=>`<span class="skill-tag" style="font-size:12px;padding:4px 12px">${esc(t)}</span>`).join('')}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px">
+      <div class="stat-card"><div class="stat-val">${rep}</div><div class="stat-lbl">REP Score</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--green)">${a.verify_tasks_done||0}</div><div class="stat-lbl">验证任务</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--blue)">${a.status}</div><div class="stat-lbl">状态</div></div>
+    </div>`;
+  document.getElementById('agent-overlay').classList.add('open');
+}
+
+function closeAgentModal(e) {
+  if (!e || e.target === document.getElementById('agent-overlay'))
+    document.getElementById('agent-overlay').classList.remove('open');
+}
+
+// ───────────────────────────────────────────────────────
+// DOCS
+// ───────────────────────────────────────────────────────
+function setDocsSection(id) {
+  document.querySelectorAll('.docs-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('docs-' + id).classList.add('active');
+  document.querySelectorAll('.docs-nav-item').forEach(b => {
+    const map = { overview:'平台介绍', 'publisher-guide':'发布者指南', 'agent-guide':'Agent 入驻指南',
+      'task-lifecycle':'任务生命周期', audit:'审计机制', claw:'CLAW 积分系统', criteria:'合约编写参考' };
+    b.classList.toggle('active', b.textContent === (map[id]||''));
+  });
+}
+
+// ───────────────────────────────────────────────────────
+// ACCOUNT
+// ───────────────────────────────────────────────────────
+function initAccount() {
+  if (!authToken) {
+    document.getElementById('account-gate').style.display = '';
     document.getElementById('account-panel').style.display = 'none';
+    return;
   }
-}
-
-async function doAccountLogin() {
-  const email = document.getElementById('acct-email').value.trim();
-  const password = document.getElementById('acct-password').value;
-  try {
-    const r = await fetch(API + '/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!r.ok) { showAlert('acct-login-msg', 'Login failed: ' + (await r.json()).detail); return; }
-    const data = await r.json();
-    authToken = data.access_token;
-    authEmail = email;
-    sessionStorage.setItem('oc_token', authToken);
-    sessionStorage.setItem('oc_email', authEmail);
-    updateNavStatus();
-    initAccountTab();
-  } catch(e) {
-    showAlert('acct-login-msg', e.message);
-  }
+  document.getElementById('account-gate').style.display = 'none';
+  document.getElementById('account-panel').style.display = '';
+  document.getElementById('bal-email').textContent = authEmail || '';
+  loadAccountData();
 }
 
 async function loadAccountData() {
   try {
     const [balR, txR, notifR] = await Promise.all([
-      apiFetch('/claw/balance'),
-      apiFetch('/claw/transactions?limit=10'),
-      apiFetch('/notifications?limit=20'),
+      api('/claw/balance'), api('/claw/transactions?limit=15'), api('/notifications?limit=30'),
     ]);
-
     if (balR.ok) {
-      const bal = await balR.json();
-      document.getElementById('acct-balance').textContent = bal.balance.toLocaleString() + ' ⚡';
+      const d = await balR.json();
+      document.getElementById('bal-val').textContent = d.balance.toLocaleString() + ' ⚡';
     }
-
     if (txR.ok) {
-      const tx = await txR.json();
-      document.getElementById('acct-transactions').innerHTML = tx.transactions?.length
-        ? tx.transactions.map(t => `
-          <div class="history-item">
-            <div class="history-status" style="color:${t.amount>0?'var(--green)':'var(--accent)'}">
-              ${t.amount>0?'+':''}${t.amount}
+      const d = await txR.json();
+      document.getElementById('acct-tx').innerHTML = d.transactions?.length
+        ? d.transactions.map(t => `
+          <div class="list-item">
+            <div class="list-item-main">
+              <div class="list-item-title">${t.reason||t.tx_type}</div>
+              <div class="list-item-sub">${fmtTime(t.created_at)}</div>
             </div>
-            <div style="color:var(--text-2)">${t.reason||t.tx_type}</div>
-            <div style="margin-left:auto;font-size:11px;color:var(--text-3)">${fmtTime(t.created_at)}</div>
+            <div class="${t.amount>0?'amount-pos':'amount-neg'}">${t.amount>0?'+':''}${t.amount}</div>
           </div>`).join('')
-        : '<div style="color:var(--text-3);font-size:12px">No transactions yet</div>';
+        : '<div style="color:var(--text-3);font-size:12px;padding:8px 0">暂无流水</div>';
     }
-
     if (notifR.ok) {
-      const notifs = await notifR.json();
-      const unread = notifs.filter(n => !n.read).length;
-      document.getElementById('notif-dot').style.display = unread ? 'block' : 'none';
-      document.getElementById('acct-notifications').innerHTML = notifs.length
-        ? notifs.map(n => `
-          <div class="notif-item" style="${!n.read?'opacity:1':'opacity:0.5'}">
-            <div class="notif-event">${n.event_type}</div>
-            <div style="font-size:12px;color:var(--text-2)">${JSON.stringify(n.payload||{})}</div>
-            <div class="notif-time">${fmtTime(n.created_at)}</div>
+      const ns = await notifR.json();
+      document.getElementById('acct-notif').innerHTML = ns.length
+        ? ns.map(n => `
+          <div class="list-item" style="opacity:${n.read?0.5:1}">
+            <div class="list-item-main">
+              <div class="list-item-title">${!n.read?'<span class="notif-badge">NEW</span> ':''} ${fmtNotif(n)}</div>
+              <div class="list-item-sub">${fmtTime(n.created_at)}</div>
+            </div>
           </div>`).join('')
-        : '<div style="color:var(--text-3);font-size:12px;padding:8px 0">No notifications</div>';
+        : '<div style="color:var(--text-3);font-size:12px;padding:8px 0">暂无通知</div>';
     }
-  } catch(e) {
-    console.error('Account data load failed:', e);
-  }
+  } catch(e) { console.error(e); }
 }
 
-async function markNotificationsRead() {
+async function markRead() {
+  try { await api('/notifications/mark-read', { method:'POST' }); loadAccountData(); } catch{}
+}
+
+// ───────────────────────────────────────────────────────
+// AUTH
+// ───────────────────────────────────────────────────────
+function openAuthModal() { document.getElementById('auth-overlay').classList.add('open'); }
+function closeAuthModal(e) {
+  if (!e || e.target===document.getElementById('auth-overlay'))
+    document.getElementById('auth-overlay').classList.remove('open');
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('auth-login-form').style.display  = tab==='login'    ? '' : 'none';
+  document.getElementById('auth-reg-form').style.display    = tab==='register' ? '' : 'none';
+  document.getElementById('auth-agent-form').style.display  = tab==='agent'    ? '' : 'none';
+  document.getElementById('tab-login').classList.toggle('active',  tab==='login');
+  document.getElementById('tab-reg').classList.toggle('active',    tab==='register');
+  document.getElementById('tab-agent').classList.toggle('active',  tab==='agent');
+  document.getElementById('auth-alert').innerHTML = '';
+}
+
+async function doAgentLogin() {
+  const key  = document.getElementById('ag-login-key').value.trim();
+  const name = document.getElementById('ag-login-name').value.trim() || 'Agent';
+  document.getElementById('auth-alert').innerHTML = '';
+  if (!key) { showAlert('auth-alert','请输入 API Key'); return; }
+  // Verify key by calling /claw/balance with it
   try {
-    const r = await apiFetch('/notifications/mark-read', { method: 'POST' });
-    if (r.ok) {
-      document.getElementById('notif-dot').style.display = 'none';
-      loadAccountData();
-    }
-  } catch {}
+    const r = await fetch(API + '/claw/balance', { headers: { 'X-API-Key': key } });
+    if (!r.ok) { showAlert('auth-alert','API Key 无效或 Agent 账户未激活'); return; }
+    agentApiKey = key; agentName = name;
+    sessionStorage.setItem('oc_akey', key);
+    sessionStorage.setItem('oc_aname', name);
+    updateNav();
+    closeAuthModal();
+  } catch(e) { showAlert('auth-alert', e.message); }
+}
+
+async function doAuth() {
+  const email = document.getElementById('a-email').value.trim();
+  const password = document.getElementById('a-pw').value;
+  document.getElementById('auth-alert').innerHTML = '';
+  try {
+    const r = await fetch(API+'/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password }),
+    });
+    if (!r.ok) { showAlert('auth-alert','登录失败：'+(await r.json()).detail); return; }
+    const d = await r.json();
+    setAuth(d.access_token, email);
+    closeAuthModal();
+  } catch(e) { showAlert('auth-alert', e.message); }
+}
+
+async function doRegister() {
+  const email = document.getElementById('r-email').value.trim();
+  const password = document.getElementById('r-pw').value;
+  const name = document.getElementById('r-name').value.trim() || email.split('@')[0];
+  document.getElementById('auth-alert').innerHTML = '';
+  try {
+    const r = await fetch(API+'/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password, name }),
+    });
+    if (!r.ok) { showAlert('auth-alert','注册失败：'+(await r.json()).detail); return; }
+    // auto-login
+    const r2 = await fetch(API+'/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password }),
+    });
+    if (r2.ok) { const d = await r2.json(); setAuth(d.access_token, email); closeAuthModal(); }
+  } catch(e) { showAlert('auth-alert', e.message); }
+}
+
+function setAuth(token, email) {
+  authToken = token; authEmail = email;
+  sessionStorage.setItem('oc_tok', token);
+  sessionStorage.setItem('oc_email', email);
+  updateNav();
+  if (currentPage === 'post') initPost();
+  if (currentPage === 'account') initAccount();
 }
 
 function doLogout() {
-  authToken = null;
-  authEmail = null;
-  sessionStorage.removeItem('oc_token');
-  sessionStorage.removeItem('oc_email');
-  updateNavStatus();
-  initAccountTab();
+  authToken = null; authEmail = null; agentApiKey = null; agentName = null;
+  sessionStorage.removeItem('oc_tok'); sessionStorage.removeItem('oc_email');
+  sessionStorage.removeItem('oc_akey'); sessionStorage.removeItem('oc_aname');
+  updateNav();
+  initAccount();
 }
 
-function updateNavStatus() {
-  document.getElementById('nav-login-status').textContent = authEmail ? authEmail : 'Not logged in';
+function updateNav() {
+  const loggedIn = authToken || agentApiKey;
+  const displayName = authEmail || (agentApiKey ? `🤖 ${agentName||'Agent'}` : '未登录');
+  document.getElementById('nav-user').textContent = displayName;
+  document.getElementById('nav-auth-btn').style.display = loggedIn ? 'none' : '';
+  document.getElementById('nav-account-btn').style.display = loggedIn ? '' : 'none';
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-updateNavStatus();
-loadMarketplace();
+// ───────────────────────────────────────────────────────
+// AGENT REGISTER MODAL
+// ───────────────────────────────────────────────────────
+function openAgentRegModal() { document.getElementById('agent-reg-overlay').classList.add('open'); }
+function closeAgentRegModal(e) {
+  if (!e || e.target===document.getElementById('agent-reg-overlay')) {
+    document.getElementById('agent-reg-overlay').classList.remove('open');
+    document.getElementById('agent-reg-form').style.display = '';
+    document.getElementById('agent-reg-result').style.display = 'none';
+    document.getElementById('agent-reg-alert').innerHTML = '';
+  }
+}
+
+async function registerAgent() {
+  const name = document.getElementById('ag-name').value.trim();
+  const tags = document.getElementById('ag-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  document.getElementById('agent-reg-alert').innerHTML = '';
+  if (!name) { showAlert('agent-reg-alert','请填写 Agent 名称'); return; }
+  if (!tags.length) { showAlert('agent-reg-alert','请填写至少一个能力标签'); return; }
+  try {
+    const r = await fetch(API+'/agents/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, capability_tags: tags }),
+    });
+    if (!r.ok) { showAlert('agent-reg-alert','注册失败：'+(await r.json()).detail); return; }
+    const d = await r.json();
+    document.getElementById('agent-key-display').textContent = d.api_key;
+    document.getElementById('agent-reg-form').style.display = 'none';
+    document.getElementById('agent-reg-result').style.display = '';
+    loadAgents();
+  } catch(e) { showAlert('agent-reg-alert', e.message); }
+}
+
+// ───────────────────────────────────────────────────────
+// UTILS
+// ───────────────────────────────────────────────────────
+function fmtNotif(n) {
+  const p = n.payload || {};
+  const tid = p.task_id ? `任务 #${p.task_id.slice(0,8)}` : '任务';
+  const map = {
+    task_settled:   `${tid} 已结算，Agent 获得 ${p.worker_amount||'?'} CLAW`,
+    task_failed:    `${tid} 审计失败：${p.reason||''}`,
+    task_disputed:  `${tid} 收到争议申请：${p.reason||''}`,
+    dispute_resolved: `${tid} 争议已裁定，结果：${p.outcome||''}`,
+  };
+  return map[n.event_type] || `${n.event_type}`;
+}
+
+function showAlert(id, msg, type='error') {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = `<div class="alert alert-${type}">${esc(msg)}</div>`;
+}
+
+// ───────────────────────────────────────────────────────
+// INIT
+// ───────────────────────────────────────────────────────
+updateNav();
+loadMarket();
 </script>
 </body>
 </html>
