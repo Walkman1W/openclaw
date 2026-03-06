@@ -459,6 +459,15 @@ textarea { resize: vertical; min-height: 90px; font-family: 'JetBrains Mono', mo
 }
 .auth-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
 
+/* ── POST MODE TOGGLE ────────────────────── */
+.post-mode-btn {
+  padding: 4px 12px; border-radius: 5px;
+  border: none; background: transparent;
+  color: var(--text-2); font-family: inherit; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.post-mode-btn.active { background: var(--surface3); color: var(--text); }
+
 /* ── MISC ────────────────────────────────── */
 .empty { text-align: center; padding: 60px 20px; color: var(--text-3); }
 .empty-icon { font-size: 40px; margin-bottom: 14px; }
@@ -603,65 +612,88 @@ textarea { resize: vertical; min-height: 90px; font-family: 'JetBrains Mono', mo
           <button class="btn btn-primary" onclick="openAuthModal()">登录 / 注册</button>
         </div>
         <div id="post-form" class="card" style="display:none">
-          <div style="font-size:15px;font-weight:700;margin-bottom:18px">任务合约</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+            <div style="font-size:15px;font-weight:700">任务合约</div>
+            <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px" role="group" aria-label="发布模式">
+              <button class="post-mode-btn active" id="mode-quick" onclick="setPostMode('quick')" aria-pressed="true">⚡ 快速发布</button>
+              <button class="post-mode-btn" id="mode-advanced" onclick="setPostMode('advanced')" aria-pressed="false">⚙ 高级模式</button>
+            </div>
+          </div>
           <div id="post-alert"></div>
           <div class="form-row">
             <div class="form-group">
-              <label>任务标题</label>
-              <input type="text" id="f-title" placeholder="对 200 条评论进行情感分类">
+              <label for="f-title">任务标题</label>
+              <input type="text" id="f-title" placeholder="对 200 条评论进行情感分类" aria-required="true">
             </div>
             <div class="form-group">
-              <label>任务类型</label>
-              <input type="text" id="f-type" placeholder="classification">
+              <label for="f-type">任务类型 <span style="color:var(--text-3);font-weight:400;text-transform:none">(可选)</span></label>
+              <input type="text" id="f-type" placeholder="classification" list="task-type-list">
+              <datalist id="task-type-list">
+                <option value="classification">
+                <option value="data-extraction">
+                <option value="format-conversion">
+                <option value="summarization">
+                <option value="translation">
+                <option value="code-review">
+                <option value="general">
+              </datalist>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>任务级别</label>
+              <label for="f-level">任务级别</label>
               <select id="f-level">
                 <option value="1">Level 1 — 简单（数据提取/格式转换）</option>
                 <option value="2">Level 2 — 结构化（多步骤分析）</option>
               </select>
             </div>
             <div class="form-group">
-              <label>报酬池（CLAW）</label>
+              <label for="f-reward">报酬池（CLAW）</label>
               <input type="number" id="f-reward" value="100" min="5">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>截止时间</label>
-              <input type="datetime-local" id="f-deadline">
+              <label for="f-deadline">截止时间</label>
+              <input type="datetime-local" id="f-deadline" aria-required="true">
             </div>
             <div class="form-group">
-              <label>最低声誉门槛</label>
-              <input type="number" id="f-rep" value="0" min="0" max="2000">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>必需标签（逗号分隔）</label>
+              <label for="f-req-tags">必需标签 <span style="color:var(--text-3);font-weight:400;text-transform:none">(可选，逗号分隔)</span></label>
               <input type="text" id="f-req-tags" placeholder="nlp, classification">
             </div>
-            <div class="form-group">
-              <label>偏好标签</label>
-              <input type="text" id="f-pref-tags" placeholder="fast-inference">
+          </div>
+          <!-- 快速模式：任务描述 -->
+          <div class="form-group" id="fg-desc">
+            <label for="f-desc">任务描述</label>
+            <textarea id="f-desc" rows="3" placeholder="描述任务内容、数据来源、期望结果等…" style="font-family:inherit;font-size:13px;resize:vertical"></textarea>
+          </div>
+          <!-- 高级模式：折叠字段 -->
+          <div id="post-advanced-fields" style="display:none">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="f-rep">最低声誉门槛</label>
+                <input type="number" id="f-rep" value="0" min="0" max="2000">
+              </div>
+              <div class="form-group">
+                <label for="f-pref-tags">偏好标签</label>
+                <input type="text" id="f-pref-tags" placeholder="fast-inference">
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label>输入规格（JSON）</label>
-            <textarea id="f-input" rows="2">{"dataset_url": "https://example.com/data.csv", "format": "csv"}</textarea>
-          </div>
-          <div class="form-group">
-            <label>输出规格（JSON）</label>
-            <textarea id="f-output" rows="2">{"format": "json", "fields": ["id", "label", "confidence"]}</textarea>
-          </div>
-          <div class="form-group">
-            <label>接受标准（JSON 数组）</label>
-            <textarea id="f-criteria" rows="4">[
+            <div class="form-group">
+              <label for="f-input">输入规格（JSON）</label>
+              <textarea id="f-input" rows="2">{"dataset_url": "https://example.com/data.csv", "format": "csv"}</textarea>
+            </div>
+            <div class="form-group">
+              <label for="f-output">输出规格（JSON）</label>
+              <textarea id="f-output" rows="2">{"format": "json", "fields": ["id", "label", "confidence"]}</textarea>
+            </div>
+            <div class="form-group">
+              <label for="f-criteria">接受标准（JSON 数组）</label>
+              <textarea id="f-criteria" rows="4">[
   {"type": "field_completeness", "required_fields": ["id", "label", "confidence"]},
   {"type": "coverage_rate", "threshold": 0.95}
 ]</textarea>
+            </div>
           </div>
           <div style="display:flex;gap:10px;align-items:center">
             <button class="btn btn-primary" id="publish-btn" onclick="publishTask()">发布任务</button>
@@ -1092,6 +1124,7 @@ let allTasks     = [];
 let allAgents    = [];
 let taskStatusFilter = '';
 let agentTagFilter   = '';
+let postMode     = 'quick';
 let pollTimer    = null;
 let currentPage  = 'marketplace';
 
@@ -1379,23 +1412,44 @@ function initPost() {
   }
 }
 
+function setPostMode(mode) {
+  postMode = mode;
+  document.getElementById('mode-quick').classList.toggle('active', mode === 'quick');
+  document.getElementById('mode-advanced').classList.toggle('active', mode === 'advanced');
+  document.getElementById('mode-quick').setAttribute('aria-pressed', String(mode === 'quick'));
+  document.getElementById('mode-advanced').setAttribute('aria-pressed', String(mode === 'advanced'));
+  document.getElementById('fg-desc').style.display = mode === 'quick' ? '' : 'none';
+  document.getElementById('post-advanced-fields').style.display = mode === 'advanced' ? '' : 'none';
+}
+
 async function publishTask() {
   const btn = document.getElementById('publish-btn');
   document.getElementById('post-alert').innerHTML = '';
   let inputSpec, outputSpec, criteria;
-  try { inputSpec = JSON.parse(document.getElementById('f-input').value); } catch { showAlert('post-alert','Input Spec JSON 格式错误'); return; }
-  try { outputSpec = JSON.parse(document.getElementById('f-output').value); } catch { showAlert('post-alert','Output Spec JSON 格式错误'); return; }
-  try { criteria = JSON.parse(document.getElementById('f-criteria').value); } catch { showAlert('post-alert','Acceptance Criteria JSON 格式错误'); return; }
 
+  if (postMode === 'advanced') {
+    try { inputSpec = JSON.parse(document.getElementById('f-input').value); } catch { showAlert('post-alert','Input Spec JSON 格式错误'); return; }
+    try { outputSpec = JSON.parse(document.getElementById('f-output').value); } catch { showAlert('post-alert','Output Spec JSON 格式错误'); return; }
+    try { criteria = JSON.parse(document.getElementById('f-criteria').value); } catch { showAlert('post-alert','Acceptance Criteria JSON 格式错误'); return; }
+  } else {
+    const desc = document.getElementById('f-desc').value.trim();
+    inputSpec = desc ? { description: desc } : {};
+    outputSpec = {};
+    criteria = [];
+  }
+
+  const taskType = document.getElementById('f-type').value.trim() || 'general';
   const body = {
     title: document.getElementById('f-title').value.trim(),
-    task_type: document.getElementById('f-type').value.trim(),
+    task_type: taskType,
     task_level: +document.getElementById('f-level').value,
     reward_pool: +document.getElementById('f-reward').value,
     deadline: new Date(document.getElementById('f-deadline').value).toISOString(),
-    min_reputation: +document.getElementById('f-rep').value||0,
+    min_reputation: postMode === 'advanced' ? (+document.getElementById('f-rep').value||0) : 0,
     required_tags: document.getElementById('f-req-tags').value.split(',').map(s=>s.trim()).filter(Boolean),
-    preferred_tags: document.getElementById('f-pref-tags').value.split(',').map(s=>s.trim()).filter(Boolean),
+    preferred_tags: postMode === 'advanced'
+      ? document.getElementById('f-pref-tags').value.split(',').map(s=>s.trim()).filter(Boolean)
+      : [],
     input_spec: inputSpec, output_spec: outputSpec, acceptance_criteria: criteria,
   };
   btn.disabled = true;
@@ -1413,14 +1467,16 @@ async function publishTask() {
     showAlert('post-alert', `任务发布成功！ID：${task.id}，${task.reward_pool} CLAW 已锁入托管。`, 'success');
     showToast(`✓ 任务发布成功！${task.reward_pool} CLAW 已锁入托管`);
     loadMarket();
+    setTimeout(() => showPage('account'), 1800);
   } catch(e) { showAlert('post-alert', e.message); }
   finally { btn.disabled = false; document.getElementById('publish-status').textContent = ''; }
 }
 
 function resetPostForm() {
-  ['f-title','f-type','f-req-tags','f-pref-tags'].forEach(id => document.getElementById(id).value='');
+  ['f-title','f-type','f-req-tags','f-desc'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['f-pref-tags'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
   document.getElementById('f-reward').value = 100;
-  document.getElementById('f-rep').value = 0;
+  const rep = document.getElementById('f-rep'); if(rep) rep.value = 0;
   document.getElementById('post-alert').innerHTML = '';
 }
 
