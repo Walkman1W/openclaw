@@ -38,6 +38,8 @@ async def list_publisher_tasks(
         {
             "id": str(t.id), "title": t.title, "status": t.status,
             "reward_pool": t.reward_pool, "created_at": t.created_at.isoformat(),
+            "deadline": t.deadline.isoformat() if t.deadline else None,
+            "assignee_id": str(t.assignee_id) if t.assignee_id else None,
         }
         for t in tasks
     ]

@@ -968,6 +968,10 @@ textarea { resize: vertical; min-height: 90px; font-family: 'JetBrains Mono', mo
           </div>
         </div>
       </div>
+      <div class="card" style="margin-top:20px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px">我发布的任务</div>
+        <div id="acct-my-tasks"><div class="loading" style="padding:20px"><div class="spinner"></div></div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1080,6 +1084,7 @@ textarea { resize: vertical; min-height: 90px; font-family: 'JetBrains Mono', mo
 const API = '/api/v1';
 let authToken    = sessionStorage.getItem('oc_tok')      || null;  // JWT (publisher)
 let authEmail    = sessionStorage.getItem('oc_email')    || null;
+let authId       = sessionStorage.getItem('oc_id')       || null;  // account UUID
 let agentApiKey  = sessionStorage.getItem('oc_akey')     || null;  // API key (agent)
 let agentName    = sessionStorage.getItem('oc_aname')    || null;
 let allTasks     = [];
@@ -1563,11 +1568,26 @@ function initAccount() {
   loadAccountData();
 }
 
+const TASK_STATUS_LABEL = {
+  pending: '待认领', claimed: '已认领', in_progress: '进行中',
+  submitted: '已提交', under_audit: '审核中', settled: '已结算',
+  settled_override: '已结算', disputed: '有争议', expired: '已过期',
+};
+const TASK_STATUS_COLOR = {
+  pending: 'var(--text-3)', claimed: '#f59e0b', in_progress: '#3b82f6',
+  submitted: '#8b5cf6', under_audit: '#f97316', settled: 'var(--accent)',
+  settled_override: 'var(--accent)', disputed: '#ef4444', expired: 'var(--text-3)',
+};
+
 async function loadAccountData() {
   try {
-    const [balR, txR, notifR] = await Promise.all([
+    const requests = [
       api('/claw/balance'), api('/claw/transactions?limit=15'), api('/notifications?limit=30'),
-    ]);
+    ];
+    if (authId) requests.push(fetch(API + '/publishers/' + authId + '/tasks?limit=50', {
+      headers: { 'Authorization': 'Bearer ' + authToken },
+    }));
+    const [balR, txR, notifR, myTasksR] = await Promise.all(requests);
     if (balR.ok) {
       const d = await balR.json();
       document.getElementById('bal-val').textContent = d.balance.toLocaleString() + ' ⚡';
@@ -1596,6 +1616,28 @@ async function loadAccountData() {
             </div>
           </div>`).join('')
         : '<div style="color:var(--text-3);font-size:12px;padding:8px 0">暂无通知</div>';
+    }
+    const myTasksEl = document.getElementById('acct-my-tasks');
+    if (myTasksR && myTasksR.ok) {
+      const tasks = await myTasksR.json();
+      myTasksEl.innerHTML = tasks.length
+        ? tasks.map(t => {
+            const statusLabel = TASK_STATUS_LABEL[t.status] || t.status;
+            const statusColor = TASK_STATUS_COLOR[t.status] || 'var(--text-3)';
+            const deadline = t.deadline ? fmtTime(t.deadline) : '—';
+            const agent = t.assignee_id ? t.assignee_id.slice(0, 8) + '...' : '—';
+            return `
+          <div class="list-item" style="cursor:pointer" onclick="showTask('${t.id}')">
+            <div class="list-item-main">
+              <div class="list-item-title">${esc(t.title)}</div>
+              <div class="list-item-sub">截止：${deadline}　接单Agent：${agent}　奖池：${t.reward_pool} ⚡</div>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:${statusColor};white-space:nowrap">${statusLabel}</div>
+          </div>`;
+          }).join('')
+        : '<div style="color:var(--text-3);font-size:12px;padding:8px 0">暂无发布的任务</div>';
+    } else if (!authId) {
+      myTasksEl.innerHTML = '<div style="color:var(--text-3);font-size:12px;padding:8px 0">暂无发布的任务</div>';
     }
   } catch(e) { console.error(e); }
 }
@@ -1676,18 +1718,23 @@ async function doRegister() {
   } catch(e) { showAlert('auth-alert', e.message); }
 }
 
-function setAuth(token, email) {
+async function setAuth(token, email) {
   authToken = token; authEmail = email;
   sessionStorage.setItem('oc_tok', token);
   sessionStorage.setItem('oc_email', email);
+  try {
+    const r = await fetch(API + '/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (r.ok) { const d = await r.json(); authId = d.id; sessionStorage.setItem('oc_id', d.id); }
+  } catch(_) {}
   updateNav();
   if (currentPage === 'post') initPost();
   if (currentPage === 'account') initAccount();
 }
 
 function doLogout() {
-  authToken = null; authEmail = null; agentApiKey = null; agentName = null;
+  authToken = null; authEmail = null; authId = null; agentApiKey = null; agentName = null;
   sessionStorage.removeItem('oc_tok'); sessionStorage.removeItem('oc_email');
+  sessionStorage.removeItem('oc_id');
   sessionStorage.removeItem('oc_akey'); sessionStorage.removeItem('oc_aname');
   updateNav();
   initAccount();
