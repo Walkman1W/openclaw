@@ -1,15 +1,19 @@
-"""TASK-005: Agent registration and profile routes."""
+"""TASK-005/030: Agent registration, profile, and dashboard routes."""
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_db
 from app.models.account import Account
+from app.models.rep_history import RepHistory
+from app.models.task import Task
+from app.models.transaction import Transaction
 from app.schemas.account import (
     AccountStatusResponse,
     AgentRegisterRequest,
@@ -17,6 +21,7 @@ from app.schemas.account import (
 )
 from app.services.auth_service import (
     generate_api_key,
+    get_agent_by_api_key,
     get_current_account,
     hash_api_key,
 )
@@ -69,6 +74,10 @@ async def register_agent(
     await db.commit()
     await db.refresh(account)
 
+    # TASK-022: trigger onboarding verification tasks for new agents
+    from app.workers.crayfish_tasks import assign_onboarding_tasks
+    assign_onboarding_tasks.delay(str(account.id))
+
     return AgentRegisterResponse(
         agent_id=account.id,
         api_key=plain_api_key,
@@ -92,6 +101,90 @@ async def get_agent_profile(
             detail="Agent not found",
         )
     return AccountStatusResponse.model_validate(account)
+
+
+@router.get("/{agent_id}/dashboard")
+async def agent_dashboard(
+    agent_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    agent: Account = Depends(get_agent_by_api_key),
+) -> dict:
+    """TASK-030: Agent personal dashboard — past 30 days stats."""
+    if agent.id != agent_id:
+        raise HTTPException(403, "Can only view your own dashboard")
+
+    cutoff = datetime.now(tz=timezone.utc) - timedelta(days=30)
+
+    # Task counts
+    total_r = await db.execute(
+        select(func.count(Task.id)).where(Task.assignee_id == agent_id, Task.created_at >= cutoff)
+    )
+    settled_r = await db.execute(
+        select(func.count(Task.id)).where(
+            Task.assignee_id == agent_id,
+            Task.status.in_(["settled", "settled_override"]),
+            Task.updated_at >= cutoff,
+        )
+    )
+    total_tasks = total_r.scalar() or 0
+    settled_tasks = settled_r.scalar() or 0
+    completion_rate = round(settled_tasks / total_tasks, 3) if total_tasks else 0.0
+
+    # Earnings (sum of reward and deposit_refund transactions)
+    earnings_r = await db.execute(
+        select(func.sum(Transaction.amount)).where(
+            Transaction.account_id == agent_id,
+            Transaction.tx_type == "mint",
+            Transaction.reason.in_(["task_reward", "claim_deposit_refund"]),
+            Transaction.created_at >= cutoff,
+        )
+    )
+    total_earnings = int(earnings_r.scalar() or 0)
+
+    # REP history (time series)
+    rep_rows = await db.execute(
+        select(RepHistory).where(
+            RepHistory.account_id == agent_id,
+            RepHistory.created_at >= cutoff,
+        ).order_by(RepHistory.created_at.asc())
+    )
+    rep_series = [
+        {"date": r.created_at.date().isoformat(), "delta": r.delta,
+         "score_after": r.score_after, "reason": r.reason}
+        for r in rep_rows.scalars()
+    ]
+
+    return {
+        "agent_id": str(agent_id),
+        "current_rep_score": agent.rep_score,
+        "period_days": 30,
+        "total_tasks": total_tasks,
+        "settled_tasks": settled_tasks,
+        "completion_rate": completion_rate,
+        "total_earnings_claw": total_earnings,
+        "rep_history": rep_series,
+    }
+
+
+@router.get("/{agent_id}/rep_history")
+async def agent_rep_history(
+    agent_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    agent: Account = Depends(get_agent_by_api_key),
+) -> list[dict]:
+    """Return full REP_SCORE change history for authenticated agent."""
+    if agent.id != agent_id:
+        raise HTTPException(403, "Can only view your own REP history")
+    rows = await db.execute(
+        select(RepHistory).where(RepHistory.account_id == agent_id)
+        .order_by(RepHistory.created_at.desc()).limit(200)
+    )
+    return [
+        {"delta": r.delta, "score_after": r.score_after, "reason": r.reason,
+         "task_id": str(r.task_id) if r.task_id else None,
+         "created_at": r.created_at.isoformat()}
+        for r in rows.scalars()
+    ]
 
 
 @router.put("/{agent_id}/tags", response_model=AccountStatusResponse)
